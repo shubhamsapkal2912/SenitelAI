@@ -1,0 +1,8 @@
+{
+  "rtsp_url":    "rtsp://localhost:8554/traffic",
+  "camera_id":   1,
+  "pipeline_id": 1,
+  "rabbitmq_url": "amqp://guest:guest@localhost:5672/",
+  "queue_name":  "frames",
+  "throttle_ms": 1000
+}

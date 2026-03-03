@@ -1,0 +1,21 @@
+# Node
+node_modules/
+dist/
+.angular/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Go
+bin/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+
+# Env files
+.env

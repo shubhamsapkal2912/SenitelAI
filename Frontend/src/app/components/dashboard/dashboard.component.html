@@ -1,0 +1,95 @@
+<div class="app-container" [class.dark]="isDark()" [class.collapsed]="isCollapsed()">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <!-- Sidebar Header -->
+    <div class="sidebar-header">
+      <div class="logo">
+        <i class="pi pi-shield"></i>
+      </div>
+      <div class="brand" *ngIf="!isCollapsed()">
+        <h1>Sentinel AI</h1>
+        <p>Traffic Intelligence</p>
+      </div>
+      <button 
+        class="toggle-btn" 
+        (click)="toggleCollapse()"
+        pRipple
+        [pTooltip]="isCollapsed() ? 'Expand Sidebar' : 'Collapse Sidebar'"
+        tooltipPosition="right"
+      >
+        <i class="pi" [ngClass]="isCollapsed() ? 'pi-angle-right' : 'pi-angle-left'"></i>
+      </button>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+      <a
+        *ngFor="let item of navItems(); trackBy: trackByFn"
+        [routerLink]="item.routerLink"
+        routerLinkActive="active"
+        class="nav-item"
+        pRipple
+      >
+        <i class="nav-icon pi" [ngClass]="'pi-' + item.icon"></i>
+        <span class="nav-label" *ngIf="!isCollapsed()">{{ item.label }}</span>
+        <p-badge
+          *ngIf="item.badge && !isCollapsed()"
+          [value]="item.badge"
+          severity="danger"
+        />
+      </a>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <!-- Theme Toggle -->
+      <button
+        class="action-btn"
+        (click)="toggleTheme()"
+        pRipple
+        [pTooltip]="isDark() ? 'Light Mode' : 'Dark Mode'"
+        tooltipPosition="right"
+      >
+        <i class="pi" [ngClass]="isDark() ? 'pi-sun' : 'pi-moon'"></i>
+        <span *ngIf="!isCollapsed()">{{ isDark() ? 'Light' : 'Dark' }} Mode</span>
+      </button>
+
+      <!-- User Profile with Menu -->
+      <div class="user-profile">
+        <p-avatar
+          [label]="currentUser().name.charAt(0).toUpperCase()"
+          shape="circle"
+          size="large"
+          styleClass="mr-2 user-avatar"
+        />
+        <div class="user-info" *ngIf="!isCollapsed()">
+          <p class="user-name">{{ currentUser().name }}</p>
+          <p class="user-role">{{ currentUser().role }}</p>
+        </div>
+        <button
+          class="profile-menu-btn"
+          *ngIf="!isCollapsed()"
+          (click)="toggleProfileMenu($event)"
+          pRipple
+          pTooltip="Profile Menu"
+          tooltipPosition="top"
+        >
+          <i class="pi pi-ellipsis-v"></i>
+        </button>
+      </div>
+
+      <!-- Profile Overlay Menu -->
+      <p-menu 
+        #profileMenu 
+        [model]="profileMenuItems" 
+        [popup]="true"
+        styleClass="profile-menu-overlay"
+      ></p-menu>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

@@ -1,0 +1,39 @@
+@import "primeng/resources/themes/lara-light-blue/theme.css";/* You can add global styles to this file, and also import other style files */
+@import "primeicons/primeicons.css";
+
+/* Import fonts first */
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap');
+
+/* Reset and apply font globally */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Override PrimeNG default fonts */
+.p-component {
+  font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+/* Override button fonts */
+.p-button {
+  font-family: 'Public Sans', sans-serif !important;
+}
+
+/* Override input fonts */
+.p-inputtext {
+  font-family: 'Public Sans', sans-serif !important;
+}
+
+/* Override all text elements */
+input, button, select, textarea {
+  font-family: 'Public Sans', sans-serif !important;
+}
+

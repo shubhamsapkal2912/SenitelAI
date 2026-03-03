@@ -1,0 +1,452 @@
+/* ── Layout ───────────────────────────────────────────── */
+.vd-container {
+  padding: 24px;
+  background: var(--surface-ground);
+  min-height: 100vh;
+  color: var(--text-color);
+  font-family: var(--font-family);
+}
+
+/* ── Header ───────────────────────────────────────────── */
+.vd-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.vd-header-left h2 {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 600;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vd-header-left h2 i {
+  color: var(--primary-color);
+}
+
+.vd-subtitle {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--text-color-secondary);
+  margin-top: 4px;
+}
+
+.vd-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── Search input ─────────────────────────────────────── */
+.vd-search {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.vd-search i {
+  position: absolute;
+  left: 10px;
+  z-index: 1;
+  color: var(--text-color-secondary);
+}
+
+.vd-search input {
+  padding-left: 32px !important;
+  background: var(--surface-card) !important;
+  border: 1px solid var(--surface-border) !important;
+  color: var(--text-color) !important;
+  border-radius: var(--border-radius) !important;
+  width: 240px;
+  height: 38px;
+}
+
+.vd-search input::placeholder {
+  color: var(--text-color-secondary) !important;
+}
+
+.vd-search input:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 2px var(--primary-color-text, var(--focus-ring)) !important;
+  outline: none;
+}
+
+/* ── Table card ───────────────────────────────────────── */
+.vd-table-card {
+  background: var(--surface-card);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--surface-border);
+  overflow: hidden;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+  background: var(--surface-section) !important;
+  color: var(--text-color-secondary) !important;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--surface-border) !important;
+  padding: 14px 16px !important;
+  border-color: var(--surface-border) !important;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr {
+  background: var(--surface-card) !important;
+  border-bottom: 1px solid var(--surface-border) !important;
+  transition: background 0.18s;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:hover {
+  background: var(--surface-hover) !important;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+  padding: 10px 16px !important;
+  color: var(--text-color) !important;
+  border: none !important;
+  vertical-align: middle !important;
+}
+
+/* ── Snapshot thumbnail ───────────────────────────────── */
+.vd-thumb {
+  position: relative;
+  width: 120px;
+  height: 70px;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid var(--surface-border);
+  transition: border-color 0.2s;
+}
+
+.vd-thumb:hover {
+  border-color: var(--primary-color);
+}
+
+.vd-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.vd-no-img {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-ground);
+  color: var(--surface-border);
+  font-size: 1.5rem;
+}
+
+.vd-thumb-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--maskbg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color-text);
+  font-size: 1.1rem;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.vd-thumb:hover .vd-thumb-overlay {
+  opacity: 1;
+}
+
+/* ── ID badge ─────────────────────────────────────────── */
+.vd-id {
+  font-family: var(--font-family);
+  font-size: 0.82rem;
+  color: var(--text-color-secondary);
+  font-weight: 700;
+}
+
+/* ── Time cell ────────────────────────────────────────── */
+.vd-time {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vd-time-date {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.vd-time-clock {
+  font-size: 0.75rem;
+  color: var(--text-color-secondary);
+  font-family: var(--font-family);
+}
+
+.vd-time-rel {
+  font-size: 0.7rem;
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+/* ── Camera cell ──────────────────────────────────────── */
+.vd-camera {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  color: var(--text-color-secondary);
+}
+
+.vd-camera i {
+  color: var(--primary-color);
+  font-size: 0.8rem;
+}
+
+/* ── Detection tags ───────────────────────────────────── */
+.vd-det-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.vd-more {
+  background: var(--surface-overlay);
+  color: var(--primary-color);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--border-radius);
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  cursor: default;
+}
+
+/* ── Object count badge ───────────────────────────────── */
+.vd-center {
+  text-align: center;
+}
+
+.vd-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-overlay);
+  color: var(--primary-color);
+  border: 1px solid var(--surface-border);
+  border-radius: 20px;
+  padding: 2px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  min-width: 36px;
+}
+
+/* ── Empty state ──────────────────────────────────────── */
+.vd-empty {
+  text-align: center !important;
+  padding: 52px !important;
+  color: var(--text-color-secondary) !important;
+}
+
+.vd-empty i {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 12px;
+  color: var(--surface-border);
+}
+
+.vd-empty p {
+  font-size: 1rem;
+  margin: 0;
+  color: var(--text-color-secondary);
+}
+
+/* ── Paginator ────────────────────────────────────────── */
+:host ::ng-deep .vd-paginator {
+  background: var(--surface-section) !important;
+  border-top: 1px solid var(--surface-border) !important;
+  padding: 10px 16px !important;
+}
+
+:host ::ng-deep .vd-paginator .p-paginator-element {
+  color: var(--text-color-secondary) !important;
+  background: transparent !important;
+  border: 1px solid var(--surface-border) !important;
+  border-radius: var(--border-radius) !important;
+  min-width: 34px !important;
+  height: 34px !important;
+  margin: 0 2px !important;
+}
+
+:host ::ng-deep .vd-paginator .p-paginator-element:hover {
+  background: var(--surface-hover) !important;
+  color: var(--text-color) !important;
+}
+
+:host ::ng-deep .vd-paginator .p-paginator-element.p-highlight {
+  background: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: var(--primary-color-text) !important;
+}
+
+/* ── Preview Dialog ───────────────────────────────────── */
+:host ::ng-deep .vd-dialog .p-dialog {
+  background: var(--surface-card) !important;
+  border: 1px solid var(--surface-border) !important;
+  border-radius: var(--border-radius) !important;
+}
+
+:host ::ng-deep .vd-dialog .p-dialog-header {
+  background: var(--surface-section) !important;
+  color: var(--text-color) !important;
+  border-bottom: 1px solid var(--surface-border) !important;
+  padding: 16px 24px !important;
+  border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+}
+
+:host ::ng-deep .vd-dialog .p-dialog-content {
+  background: var(--surface-card) !important;
+  padding: 20px 24px 24px !important;
+}
+
+:host ::ng-deep .vd-dialog .p-dialog-header-icon {
+  color: var(--text-color-secondary) !important;
+}
+
+:host ::ng-deep .vd-dialog .p-dialog-header-icon:hover {
+  color: var(--text-color) !important;
+  background: var(--surface-hover) !important;
+}
+
+/* ── Preview layout ───────────────────────────────────── */
+.vd-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.vd-preview-img-wrap {
+  width: 100%;
+  max-height: 380px;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  border: 2px solid var(--surface-border);
+  background: var(--surface-ground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vd-preview-img {
+  width: 100%;
+  max-height: 380px;
+  object-fit: contain;
+}
+
+/* ── Meta grid ────────────────────────────────────────── */
+.vd-preview-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  background: var(--surface-section);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--border-radius);
+  padding: 16px 20px;
+}
+
+.vd-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vd-meta-label {
+  font-size: 0.68rem;
+  color: var(--text-color-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.vd-meta-value {
+  font-size: 0.9rem;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+/* ── Detection list ───────────────────────────────────── */
+.vd-det-list h4 {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  color: var(--text-color-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vd-det-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  max-height: 210px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.vd-det-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--surface-section);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--surface-border);
+  transition: background 0.15s;
+}
+
+.vd-det-row:hover {
+  background: var(--surface-hover);
+}
+
+.vd-det-idx {
+  font-size: 0.72rem;
+  color: var(--text-color-secondary);
+  min-width: 18px;
+  font-weight: 700;
+}
+
+.vd-det-conf {
+  font-size: 0.78rem;
+  color: var(--primary-color);
+  font-family: var(--font-family);
+  min-width: 52px;
+}
+
+.vd-det-bbox {
+  font-size: 0.7rem;
+  color: var(--text-color-secondary);
+  font-family: var(--font-family);
+}
+
+/* ── Scrollbar ────────────────────────────────────────── */
+.vd-det-scroll::-webkit-scrollbar       { width: 4px; }
+.vd-det-scroll::-webkit-scrollbar-track { background: var(--surface-card); }
+.vd-det-scroll::-webkit-scrollbar-thumb {
+  background: var(--surface-border);
+  border-radius: 2px;
+}
+
+.vd-det-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--text-color-secondary);
+}

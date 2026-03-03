@@ -1,0 +1,282 @@
+<p-toast position="top-right" />
+
+<div class="vd-container">
+
+  <!-- ── Page Header ─────────────────────────────────── -->
+  <div class="vd-header">
+    <div class="vd-header-left">
+      <h2><i class="pi pi-shield"></i> Violation Details</h2>
+      <span class="vd-subtitle">Monitor and review all detected violations</span>
+    </div>
+
+    <div class="vd-header-right">
+      <span class="p-input-icon-left vd-search">
+        <i class="pi pi-search"></i>
+        <input
+          pInputText
+          type="text"
+          placeholder="Search violations..."
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="onSearch()"
+        />
+      </span>
+
+      <p-button
+        icon="pi pi-refresh"
+        label="Refresh"
+        severity="secondary"
+        (onClick)="loadViolations()"
+        [loading]="loading"
+      />
+    </div>
+  </div>
+  <!-- ── Table ───────────────────────────────────────── -->
+  <div class="vd-table-card">
+    <p-table
+      [value]="paginatedViolations"
+      [loading]="loading"
+      [tableStyle]="{ 'min-width': '50rem' }"
+      styleClass="p-datatable-sm"
+      [rowHover]="true"
+    >
+
+      <!-- Header -->
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width:70px">#ID</th>
+          <th style="width:140px">Snapshot</th>
+          <th style="width:200px">Date &amp; Time</th>
+          <th>Violation Type</th>
+          <th style="width:120px">Camera</th>
+          <th style="width:80px; text-align:center">View</th>
+        </tr>
+      </ng-template>
+
+      <!-- Body -->
+      <ng-template pTemplate="body" let-v>
+        <tr>
+
+          <!-- ID -->
+          <td>
+            <span class="vd-id">#{{ v.id }}</span>
+          </td>
+
+          <!-- Snapshot -->
+          <td>
+            <div class="vd-thumb" (click)="openPreview(v)">
+              <ng-container *ngIf="v.frame_image; else noImg">
+                <img
+                  [src]="v.frame_image"
+                  alt="Violation snapshot"
+                  class="vd-thumb-img"
+                  (error)="onImageError($event)"
+                />
+              </ng-container>
+              <ng-template #noImg>
+                <div class="vd-no-img">
+                  <i class="pi pi-image"></i>
+                  <span>No Image</span>
+                </div>
+              </ng-template>
+              <div class="vd-thumb-overlay" *ngIf="v.frame_image">
+                <i class="pi pi-eye"></i>
+              </div>
+            </div>
+          </td>
+
+          <!-- Time -->
+          <td>
+            <div class="vd-time">
+              <span class="vd-time-date">{{ v.time | date:'dd MMM yyyy' }}</span>
+              <span class="vd-time-clock">{{ v.time | date:'HH:mm:ss' }}</span>
+              <span class="vd-time-rel">{{ getRelativeTime(v.time) }}</span>
+            </div>
+          </td>
+
+          <!-- Violation Type -->
+          <td>
+            <p-tag
+              [value]="v.violation_type"
+              [severity]="getViolationSeverity(v.violation_type)"
+              icon="pi pi-exclamation-triangle"
+              styleClass="vd-violation-tag"
+            />
+          </td>
+
+          <!-- Camera -->
+          <td>
+            <span class="vd-camera">
+              <i class="pi pi-video"></i>
+              Camera #{{ v.camera }}
+            </span>
+          </td>
+
+          <!-- View -->
+          <td class="vd-center">
+            <p-button
+              icon="pi pi-eye"
+              severity="secondary"
+              [rounded]="true"
+              [text]="true"
+              size="small"
+              pTooltip="View snapshot"
+              tooltipPosition="left"
+              (onClick)="openPreview(v)"
+              [disabled]="!v.frame_image"
+            />
+          </td>
+
+        </tr>
+      </ng-template>
+
+      <!-- Skeleton loading -->
+      <ng-template pTemplate="loadingbody">
+        <tr *ngFor="let _ of skeletonRows">
+          <td><p-skeleton width="36px"  height="16px" /></td>
+          <td><p-skeleton width="120px" height="70px" borderRadius="8px" /></td>
+          <td><p-skeleton width="130px" height="48px" /></td>
+          <td><p-skeleton width="140px" height="24px" /></td>
+          <td><p-skeleton width="90px"  height="16px" /></td>
+          <td><p-skeleton width="36px"  height="36px" /></td>
+        </tr>
+      </ng-template>
+
+      <!-- Empty state -->
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="vd-empty">
+            <i class="pi pi-inbox"></i>
+            <p>No violations found</p>
+          </td>
+        </tr>
+      </ng-template>
+
+    </p-table>
+
+    <!-- Paginator -->
+    <p-paginator
+      [first]="first"
+      [rows]="rows"
+      [totalRecords]="totalRecords"
+      
+      (onPageChange)="onPageChange($event)"
+      styleClass="vd-paginator"
+    />
+  </div>
+
+</div>
+
+
+<!-- ── Image Preview Dialog ────────────────────────────── -->
+<p-dialog
+  [(visible)]="previewVisible"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '860px' }"
+  header="Violation Snapshot"
+  styleClass="vd-dialog"
+  (onHide)="closePreview()"
+>
+  <div class="vd-preview" *ngIf="selectedViolation">
+
+    <!-- Full image -->
+    <div class="vd-preview-img-wrap">
+      <ng-container *ngIf="selectedViolation.frame_image; else noPreviewImg">
+        <img
+          [src]="previewImage"
+          alt="Violation snapshot"
+          class="vd-preview-img"
+          (error)="onImageError($event)"
+        />
+      </ng-container>
+      <ng-template #noPreviewImg>
+        <div class="vd-no-preview">
+          <i class="pi pi-image"></i>
+          <p>No snapshot available for this violation</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Meta grid -->
+    <div class="vd-preview-meta">
+      <div class="vd-meta-item">
+        <span class="vd-meta-label"><i class="pi pi-hashtag"></i> Violation ID</span>
+        <span class="vd-meta-value">#{{ selectedViolation.id }}</span>
+      </div>
+      <div class="vd-meta-item">
+        <span class="vd-meta-label"><i class="pi pi-clock"></i> Timestamp</span>
+        <span class="vd-meta-value">{{ selectedViolation.time | date:'dd MMM yyyy, HH:mm:ss' }}</span>
+      </div>
+      <div class="vd-meta-item">
+        <span class="vd-meta-label"><i class="pi pi-exclamation-triangle"></i> Violation Type</span>
+        <span class="vd-meta-value">
+          <p-tag
+            [value]="selectedViolation.violation_type"
+            [severity]="getViolationSeverity(selectedViolation.violation_type)"
+          />
+        </span>
+      </div>
+      <div class="vd-meta-item">
+        <span class="vd-meta-label"><i class="pi pi-cog"></i> ML Model</span>
+        <span class="vd-meta-value">Model #{{ selectedViolation.ml_model }}</span>
+      </div>
+      <div class="vd-meta-item">
+        <span class="vd-meta-label"><i class="pi pi-video"></i> Camera</span>
+        <span class="vd-meta-value">Camera #{{ selectedViolation.camera }}</span>
+      </div>
+      <div class="vd-meta-item">
+        <span class="vd-meta-label"><i class="pi pi-sitemap"></i> Pipeline</span>
+        <span class="vd-meta-value">Pipeline #{{ selectedViolation.pipeline }}</span>
+      </div>
+    </div>
+
+    <!-- Detection breakdown -->
+    <div class="vd-det-list">
+      <h4>
+        <i class="pi pi-list"></i>
+        All Detections
+        <span class="vd-det-count">{{ selectedViolation.detections.length }}</span>
+      </h4>
+
+      <div *ngIf="selectedViolation.detections.length > 0; else noDetList">
+        <div class="vd-det-scroll">
+          <div
+            class="vd-det-row"
+            *ngFor="let det of selectedViolation.detections; let i = index"
+          >
+            <span class="vd-det-idx">{{ i + 1 }}</span>
+
+            <p-tag
+              [value]="det.label"
+              [severity]="getConfidenceSeverity(det.confidence)"
+            />
+
+            <span class="vd-det-conf">{{ formatConfidence(det.confidence) }}</span>
+
+            <div class="vd-det-bbox-wrap">
+              <span class="vd-det-bbox-label">BBox:</span>
+              <span class="vd-det-bbox">
+                x1:{{ det.bbox.x1 }} y1:{{ det.bbox.y1 }}
+                x2:{{ det.bbox.x2 }} y2:{{ det.bbox.y2 }}
+              </span>
+              <span class="vd-det-bbox">
+                {{ det.bbox.width }}×{{ det.bbox.height }}px
+              </span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noDetList>
+        <div class="vd-no-det-msg">
+          <i class="pi pi-info-circle"></i>
+          No detection data recorded for this violation
+        </div>
+      </ng-template>
+
+    </div>
+
+  </div>
+</p-dialog>

@@ -1,0 +1,129 @@
+<div class="violation-report-container">
+
+  <!-- ==================== PAGE HEADER ==================== -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">Violation Report</h1>
+      <p class="page-subtitle">Traffic violation overview by time period</p>
+    </div>
+    <div class="header-right">
+      <button
+        pButton
+        icon="pi pi-refresh"
+        class="p-button-outlined p-button-secondary"
+        pTooltip="Refresh Data"
+        tooltipPosition="bottom"
+      ></button>
+      <button
+        pButton
+        icon="pi pi-filter"
+        label="Filter"
+        class="p-button-outlined p-button-secondary"
+      ></button>
+    </div>
+  </div>
+
+  <!-- ==================== REPORT ROW ==================== -->
+  <div class="report-row">
+
+    <div class="report-card" *ngFor="let section of reportSections">
+
+      <!-- Card Header -->
+      <div class="card-header">
+        <div class="card-title-group">
+          <span class="pi pi-chart-bar card-icon"></span>
+          <h2 class="card-title">{{ section.label }}</h2>
+        </div>
+        <button
+          pButton
+          icon="pi pi-download"
+          class="p-button-text p-button-sm export-btn"
+          pTooltip="Export Report"
+          tooltipPosition="left"
+          (click)="exportReport(section.period)"
+        ></button>
+      </div>
+
+      <!-- Total Count -->
+      <div class="total-count-section">
+        <span class="total-count">{{ section.totalCount }}</span>
+        <div
+          class="trend-badge"
+          [ngClass]="{
+            'trend-up':      section.trendDirection === 'up',
+            'trend-down':    section.trendDirection === 'down',
+            'trend-neutral': section.trendDirection === 'neutral'
+          }"
+        >
+          <span
+            class="pi"
+            [ngClass]="{
+              'pi-arrow-up':   section.trendDirection === 'up',
+              'pi-arrow-down': section.trendDirection === 'down',
+              'pi-minus':      section.trendDirection === 'neutral'
+            }"
+          ></span>
+          <span class="trend-value">{{ section.trend }}%</span>
+        </div>
+      </div>
+      <p class="total-label">Total Violations</p>
+
+      <div class="card-divider"></div>
+
+      <!-- Breakdown by Type -->
+      <div class="breakdown-section">
+        <h3 class="section-label">Breakdown by Type</h3>
+        <div class="stat-item" *ngFor="let stat of section.stats">
+          <div class="stat-header">
+            <span class="stat-type" [ngClass]="getSeverityTextClass(stat.severity)">
+              {{ stat.type }}
+            </span>
+            <span class="stat-count">{{ stat.count }}</span>
+          </div>
+          <div class="progress-track">
+            <div
+              class="progress-fill"
+              [ngClass]="getProgressClass(stat.severity)"
+              [style.width.%]="stat.percentage"
+            ></div>
+          </div>
+          <span class="stat-percentage">{{ stat.percentage }}%</span>
+        </div>
+      </div>
+
+      <div class="card-divider"></div>
+
+      <!-- Recent Violations -->
+      <div class="recent-section">
+        <h3 class="section-label">Recent Violations</h3>
+        <div class="violation-entry" *ngFor="let v of section.recentViolations">
+          <div class="entry-left">
+            <p-tag
+              [value]="v.type"
+              [severity]="getSeverityTag(v.severity)"
+              styleClass="entry-tag"
+            ></p-tag>
+            <div class="entry-info">
+              <span class="entry-plate">{{ v.licensePlate }}</span>
+              <span class="entry-camera">{{ v.cameraName }}</span>
+            </div>
+          </div>
+          <span class="entry-time">{{ v.timestamp }}</span>
+        </div>
+      </div>
+
+      <!-- Card Footer -->
+      <div class="card-footer">
+        <button
+          pButton
+          label="View All"
+          icon="pi pi-arrow-right"
+          iconPos="right"
+          class="p-button-text view-details-btn"
+          (click)="viewDetails(section.period)"
+        ></button>
+      </div>
+
+    </div>
+  </div>
+</div>

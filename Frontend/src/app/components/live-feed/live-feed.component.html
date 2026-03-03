@@ -1,0 +1,190 @@
+<div class="live-feed-container">
+
+  <!-- ── Page Header ──────────────────────────────────── -->
+  <header class="page-header">
+    <div>
+      <h2 class="page-title">Live Traffic Feed</h2>
+      <p class="page-subtitle">Monitoring Sector 7 - Downtown District</p>
+    </div>
+
+    <div class="view-mode-selector">
+      <button
+        class="view-btn"
+        [class.active]="currentViewMode === 'single'"
+        (click)="setViewMode('single')"
+        pTooltip="Single View"
+        tooltipPosition="bottom"
+      ><i class="pi pi-stop"></i></button>
+
+      <button
+        class="view-btn"
+        [class.active]="currentViewMode === 'grid'"
+        (click)="setViewMode('grid')"
+        pTooltip="Grid View"
+        tooltipPosition="bottom"
+      ><i class="pi pi-th-large"></i></button>
+
+      <button
+        class="view-btn"
+        [class.active]="currentViewMode === 'grid-large'"
+        (click)="setViewMode('grid-large')"
+        pTooltip="Large Grid"
+        tooltipPosition="bottom"
+      ><i class="pi pi-table"></i></button>
+    </div>
+  </header>
+
+  <!-- ── Main Content ─────────────────────────────────── -->
+  <main class="main-content">
+
+    <!-- Video Grid -->
+    <section class="video-grid-section">
+      <div
+        class="video-grid"
+        [class.view-single]="currentViewMode === 'single'"
+        [class.view-grid]="currentViewMode === 'grid'"
+        [class.view-grid-large]="currentViewMode === 'grid-large'"
+      >
+        <div
+          *ngFor="let camera of cameraFeeds"
+          class="camera-feed"
+        >
+          <!-- Feed Header -->
+          <div class="feed-header">
+            <div class="feed-info">
+              <span class="live-badge" *ngIf="camera.isLive">
+                <span class="pulse-dot"></span>
+                Live
+              </span>
+              <span class="camera-label">{{ camera.id }}: {{ camera.name }}</span>
+            </div>
+            <div class="feed-actions">
+              <span class="fps-badge">FPS: {{ camera.fps }}</span>
+              <button class="menu-btn" (click)="showCameraMenu(camera, $event)">
+                <i class="pi pi-ellipsis-v"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- ✅ Live WebSocket Frame — YOLO already drew bboxes on it -->
+          <div class="feed-content">
+            <ng-container *ngIf="camera.frame$ | async as liveFrame; else waitingFeed">
+              <img
+                [src]="liveFrame"
+                [alt]="camera.name"
+                class="feed-image"
+              />
+            </ng-container>
+
+            <!-- Waiting for first frame -->
+            <ng-template #waitingFeed>
+              <div class="feed-waiting">
+                <i class="pi pi-spin pi-spinner"></i>
+                <span>Connecting to {{ camera.name }}...</span>
+                <span class="feed-waiting-sub">{{ camera.location }}</span>
+              </div>
+            </ng-template>
+          </div>
+
+          <!-- Hover Actions -->
+          <div class="feed-hover-actions">
+            <p-button
+              label="Snapshot"
+              icon="pi pi-camera"
+              styleClass="snapshot-btn"
+              (onClick)="takeSnapshot(camera)"
+            />
+            <p-button
+              label="Flag Incident"
+              icon="pi pi-flag"
+              severity="danger"
+              styleClass="flag-btn"
+              (onClick)="flagIncident(camera)"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Violations Sidebar ─────────────────────────── -->
+    <aside class="violations-sidebar">
+
+      <div class="sidebar-header">
+        <div class="header-title">
+          <i class="pi pi-exclamation-triangle"></i>
+          <h3>Live Violations</h3>
+        </div>
+        <p-badge [value]="newViolationsCount" severity="danger" />
+      </div>
+
+      <div class="violations-list">
+        <div
+          *ngFor="let violation of violations"
+          class="violation-card"
+          [class]="getViolationBorderClass(violation.severity)"
+          [class.is-new]="violation.isNew"
+        >
+          <div class="violation-header">
+            <div>
+              <span
+                class="violation-type"
+                [class]="getViolationTextClass(violation.severity)"
+              >{{ violation.type }}</span>
+              <h4 class="violation-camera">{{ violation.cameraId }}: {{ violation.cameraName }}</h4>
+            </div>
+            <span class="violation-time">{{ violation.timestamp }}</span>
+          </div>
+
+          <div class="violation-details">
+            <div class="plate-preview">
+              <img
+                *ngIf="violation.plateImageUrl"
+                [src]="violation.plateImageUrl"
+                [alt]="violation.licensePlate"
+                class="plate-image"
+              />
+              <div *ngIf="!violation.plateImageUrl" class="plate-placeholder">
+                No Plate
+              </div>
+            </div>
+
+            <div class="plate-info">
+              <span class="plate-number">{{ violation.licensePlate }}</span>
+              <span class="confidence">
+                Confidence:
+                <span [class]="violation.confidence >= 90 ? 'text-green' : 'text-yellow'">
+                  {{ violation.confidence }}%
+                </span>
+              </span>
+            </div>
+          </div>
+
+          <div class="violation-actions">
+            <p-button
+              label="Verify"
+              styleClass="verify-btn"
+              [outlined]="true"
+              (onClick)="verifyViolation(violation)"
+            />
+            <p-button
+              label="Flag"
+              severity="danger"
+              styleClass="flag-violation-btn"
+              (onClick)="flagViolation(violation)"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <p-button
+          label="View All Incidents"
+          icon="pi pi-arrow-right"
+          styleClass="w-full view-all-btn"
+          (onClick)="viewAllIncidents()"
+        />
+      </div>
+    </aside>
+
+  </main>
+</div>

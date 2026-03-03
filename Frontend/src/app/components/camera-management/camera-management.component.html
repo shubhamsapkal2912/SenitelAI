@@ -1,0 +1,336 @@
+<!-- Complete camera-management.component.html -->
+<div class="camera-management-container">
+  <!-- Toast Notifications -->
+  <p-toast position="top-right"></p-toast>
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="page-header-content">
+      <h1 class="page-title">
+        <i class="pi pi-video mr-2"></i>
+        Camera Management
+      </h1>
+      <p class="page-subtitle">{{ totalRecords }} cameras across all zones</p>
+    </div>
+    
+    <div class="header-actions">
+      <button
+        class="icon-btn"
+        pButton
+        icon="pi pi-bell"
+        [text]="true"
+        [rounded]="true"
+        severity="info"
+        pBadge="3"
+        badgeSeverity="danger"
+        pTooltip="Notifications"
+        (click)="openNotifications()"
+      ></button>
+      
+      <div class="divider"></div>
+      
+      <button
+        class="support-btn"
+        pButton
+        label="Support"
+        icon="pi pi-question-circle"
+        severity="secondary"
+        [text]="true"
+        pTooltip="Get Help"
+        (click)="openSupport()"
+      ></button>
+    </div>
+  </header>
+
+  <!-- Content Area -->
+  <div class="content-area">
+    <!-- Metrics Grid -->
+    <div class="metrics-grid">
+      <!-- Total Deployed -->
+      <div class="metric-card">
+        <div class="metric-decoration blue-gradient"></div>
+        <div class="metric-content">
+          <div class="metric-header">
+            <div>
+              <p class="metric-label">Total Deployed</p>
+              <h3 class="metric-value">{{ metrics.totalDeployed | number }}</h3>
+            </div>
+            <div class="metric-icon blue">
+              <i class="pi pi-video"></i>
+            </div>
+          </div>
+          <div class="metric-footer">
+            <span class="trend-up">
+              <i class="pi pi-arrow-up"></i> +12
+            </span>
+            <span class="trend-label">this month</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Systems -->
+      <div class="metric-card">
+        <div class="metric-decoration green-gradient"></div>
+        <div class="metric-content">
+          <div class="metric-header">
+            <div>
+              <p class="metric-label">Active Cameras</p>
+              <h3 class="metric-value">{{ metrics.active | number }}</h3>
+            </div>
+            <div class="metric-icon green">
+              <i class="pi pi-wifi"></i>
+            </div>
+          </div>
+          <div class="metric-progress">
+            <div class="progress-bar">
+              <div
+                class="progress-fill"
+                [style.width.%]="(metrics.active / metrics.totalDeployed) * 100 || 0"
+              ></div>
+            </div>
+            <p class="progress-label">
+              {{ metrics.active }} / {{ metrics.totalDeployed }} active
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inactive Cameras -->
+      <div class="metric-card">
+        <div class="metric-decoration orange-gradient"></div>
+        <div class="metric-content">
+          <div class="metric-header">
+            <div>
+              <p class="metric-label">Needs Attention</p>
+              <h3 class="metric-value">{{ metrics.inactive }}</h3>
+            </div>
+            <div class="metric-icon orange">
+              <i class="pi pi-exclamation-triangle"></i>
+            </div>
+          </div>
+          <div class="metric-footer">
+            <p-tag value="{{ metrics.inactive }} Inactive" severity="warning" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Toolbar -->
+    <div class="action-toolbar">
+      <div class="toolbar-left">
+        <span class="p-input-icon-left search-wrapper">
+          <i class="pi pi-search"></i>
+          <input
+            type="text"
+            pInputText
+            [(ngModel)]="searchQuery"
+            (keyup.enter)="onSearch()"
+            (keyup)="searchQuery.length > 2 && onSearch()"
+            placeholder="Search cameras by name, RTSP, location..."
+            class="search-input"
+          />
+        </span>
+        
+        <p-button
+          label="Clear"
+          icon="pi pi-times"
+          severity="secondary"
+          [text]="true"
+          styleClass="toolbar-btn ml-2"
+          (onClick)="searchQuery = ''; onSearch()"
+        />
+      </div>
+      
+      <p-button
+        label="Add New Camera"
+        icon="pi pi-plus"
+        severity="primary"
+        (onClick)="addNewCamera()"
+        styleClass="add-btn"
+      />
+    </div>
+
+    <!-- Loading Overlay -->
+    <div *ngIf="loading" class="loading-overlay">
+      <i class="pi pi-spin pi-spinner loading-icon"></i>
+      <p>Loading cameras...</p>
+    </div>
+
+    <!-- Camera Table -->
+    <div class="table-container">
+      <p-table
+        [value]="paginatedCameras"
+        [loading]="loading"
+        [tableStyle]="{ 'min-width': '100%' }"
+        styleClass="camera-table"
+        [scrollable]="true"
+        scrollHeight="600px"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 25%">Name</th>
+            <th style="width: 20%">RTSP URL</th>
+            <th style="width: 20%">Location</th>
+            <th style="width: 15%">Status</th>
+            <th style="width: 20%" class="text-right">Actions</th>
+          </tr>
+        </ng-template>
+        
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5" class="empty-state">
+              <i class="pi pi-video empty-icon"></i>
+              <p>No cameras found</p>
+              <small>Try adjusting your search or add a new camera</small>
+            </td>
+          </tr>
+        </ng-template>
+        
+        <ng-template pTemplate="body" let-camera let-rowIndex="rowIndex">
+         <tr class="table-row" [class]="getRowClass(camera.status)">
+            <td>
+              <div class="camera-info">
+                <!-- Fallback avatar if no thumbnail -->
+                <div class="camera-avatar" [style.background]="'hsl(' + (camera.id % 360) + ', 70%, 60%)'">
+                  {{ camera.name.charAt(0).toUpperCase() }}
+                </div>
+                <div class="camera-details">
+                  <div class="camera-name">{{ camera.name }}</div>
+                  <div class="camera-id">#{{ camera.id }}</div>
+                </div>
+              </div>
+            </td>
+            
+            <td class="rtsp-cell">
+              <div class="rtsp-info">
+                <span class="rtsp-url" pTooltip="{{ camera.rtsp_url }}" tooltipPosition="top">{{ getRtspPreview(camera.rtsp_url) }}</span>
+                <i class="pi pi-copy copy-btn" pTooltip="Copy RTSP" (click)="copyRtsp(camera.rtsp_url)"></i>
+              </div>
+            </td>
+            
+            <td>
+              <div class="location-info">
+                <div class="location-primary">{{ camera.location }}</div>
+              </div>
+            </td>
+            
+            <td>
+              <div class="status-cell">
+                <p-tag
+                  [value]="getStatusLabel(camera.status)"
+                  [severity]="getStatusSeverity(camera.status)"
+                  styleClass="status-tag"
+                />
+                <small class="status-date">{{ getRelativeTime(camera.created_at) }}</small>
+              </div>
+            </td>
+            
+          <td class="text-right">
+  <div class="action-buttons">
+    <button
+      pButton
+      icon="pi pi-eye"
+      class="p-button-rounded p-button-text p-button-success action-btn"
+      pTooltip="View Live Feed"
+      (click)="viewFeed(camera)"
+    ></button>
+    
+    <button
+      pButton
+      icon="pi pi-pencil"
+      class="p-button-rounded p-button-text p-button-info action-btn"
+      pTooltip="Edit Camera"
+      (click)="editCamera(camera)"
+    ></button>
+    
+    <button
+      pButton
+      [icon]="camera.status === 'active' ? 'pi pi-pause-circle' : 'pi pi-play'"
+      class="p-button-rounded p-button-text action-btn"
+      [severity]="camera.status === 'active' ? 'warning' : 'success'"
+      pTooltip="{{ camera.status === 'active' ? 'Pause Camera' : 'Activate Camera' }}"
+      (click)="toggleCameraStatus(camera)"
+    ></button>
+    
+    <button
+      pButton
+      icon="pi pi-trash"
+      class="p-button-rounded p-button-text p-button-danger action-btn"
+      pTooltip="Delete Camera"
+      (click)="deleteCamera(camera)"
+    ></button>
+  </div>
+</td>
+
+          </tr>
+        </ng-template>
+      </p-table>
+
+      <!-- Pagination -->
+      <div class="pagination-wrapper" *ngIf="!loading">
+        <div class="pagination-info">
+          <p class="text-sm text-muted">
+            Showing <strong>{{ first + 1 }}</strong> to 
+            <strong>{{ (first + rows > totalRecords ? totalRecords : first + rows) }}</strong>  
+ of 
+            <strong>{{ totalRecords }}</strong> results
+          </p>
+        </div>
+        
+      <p-paginator
+  [first]="first"
+  [rows]="rows"
+  [totalRecords]="totalRecords"
+  showCurrentPageReport="true"
+  currentPageReportTemplate="({currentPage} of {totalPages})"
+  (onPageChange)="onPageChange($event)"
+/>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Add New Camera Modal -->
+<!-- Unified Add/Edit Camera Modal -->
+<p-dialog 
+  [header]="editingCamera ? 'Edit Camera' : 'Add New Camera'" 
+  [visible]="showDialog"
+  (visibleChange)="onDialogVisibleChange($event)"
+  [modal]="true" 
+  [style]="{ width: '32rem' }"
+  [closable]="true"
+  [closeOnEscape]="true"
+  styleClass="add-camera-dialog"
+>
+  <div class="p-fluid add-camera-dialog-content">
+    <div class="p-field">
+      <label for="cameraName">Camera Name <span class="required">*</span></label>
+      <input id="cameraName" pInputText [(ngModel)]="currentCamera.name" placeholder="e.g., CM-001-MainStreet" />
+    </div>
+    <div class="p-field">
+      <label for="rtspUrl">RTSP URL <span class="required">*</span></label>
+      <input id="rtspUrl" pInputText [(ngModel)]="currentCamera.rtsp_url" placeholder="rtsp://192.168.1.100/stream" />
+    </div>
+    <div class="p-field">
+      <label for="location">Location <span class="required">*</span></label>
+      <input id="location" pInputText [(ngModel)]="currentCamera.location" placeholder="e.g., Main St & 5th Ave" />
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="closeDialog()" />
+    <p-button 
+      [label]="editingCamera ? 'Update Camera' : 'Create Camera'" 
+      icon="pi pi-check"
+      severity="primary"
+      [loading]="loading"
+      [disabled]="!isFormValid()"
+      (onClick)="saveCamera()"
+    />
+  </ng-template>
+</p-dialog>
+
+
+
+
+</div>

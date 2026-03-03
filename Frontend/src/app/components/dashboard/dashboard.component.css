@@ -1,0 +1,494 @@
+/* ==================== GLOBAL CONFIGURATION ==================== */
+:host {
+  display: block;
+  height: 100vh !important;
+  font-family: var(--font-family);
+}
+
+/* ==================== APP CONTAINER ==================== */
+.app-container {
+  display: flex;
+  height: 100vh;
+  background: var(--surface-ground);
+  color: var(--text-color);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==================== SIDEBAR ==================== */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 260px;
+  background: var(--surface-card);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-right: 1px solid var(--surface-border);
+}
+
+.app-container.collapsed .sidebar {
+  width: 80px;
+}
+
+/* Sidebar Header */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 16px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--surface-border);
+  position: relative;
+}
+
+.logo {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--blue-400) 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logo .pi {
+  font-size: 1.75rem;
+}
+
+.brand {
+  flex: 1;
+  min-width: 0;
+}
+
+.brand h1 {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0 0 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-color);
+}
+
+.brand p {
+  font-size: 13px;
+  margin: 0;
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-color-secondary);
+}
+
+/* Toggle Button */
+.toggle-btn {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 8px;
+  background: var(--surface-hover);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--text-color-secondary);
+}
+
+.toggle-btn:hover {
+  background: var(--primary-color);
+  color: var(--primary-color-text);
+  transform: scale(1.05);
+}
+
+.toggle-btn .pi {
+  font-size: 1.2rem;
+}
+
+.app-container.collapsed .toggle-btn {
+  margin-left: auto;
+}
+
+/* Navigation */
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--text-color-secondary);
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  white-space: nowrap;
+  border: none;
+}
+
+.nav-item:hover {
+  background: var(--surface-hover);
+  color: var(--primary-color);
+  transform: translateX(4px);
+}
+
+.nav-item.active {
+  background: var(--highlight-bg);
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 24px;
+  background: var(--primary-color);
+  border-radius: 0 4px 4px 0;
+}
+
+.nav-icon {
+  font-size: 1.375rem;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nav-label {
+  flex: 1;
+}
+
+.app-container.collapsed .nav-item {
+  justify-content: center;
+  padding: 12px;
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+  border-top: 1px solid var(--surface-border);
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 40px;
+  background: var(--surface-hover);
+  border: none;
+  border-radius: 10px;
+  color: var(--text-color-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.action-btn:hover {
+  background: var(--primary-color);
+  color: var(--primary-color-text);
+  transform: translateY(-1px);
+}
+
+.action-btn .pi {
+  font-size: 1.25rem;
+}
+
+.app-container.collapsed .action-btn {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto;
+}
+
+.app-container.collapsed .action-btn span:not(.pi) {
+  display: none;
+}
+
+/* User Profile */
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--surface-ground);
+  position: relative;
+}
+
+.user-profile:hover {
+  background: var(--surface-hover);
+}
+
+
+:host ::ng-deep .user-profile .p-avatar {
+  background: linear-gradient(135deg, var(--primary-color), var(--blue-400)) !important;
+}
+
+.user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-color);
+}
+
+.user-role {
+  font-size: 12px;
+  margin: 0;
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-color-secondary);
+}
+
+/* Profile Menu Button */
+.profile-menu-btn {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-color-secondary);
+}
+
+.profile-menu-btn:hover {
+  background: var(--surface-card);
+  color: var(--primary-color);
+  transform: scale(1.05);
+}
+
+.profile-menu-btn .pi {
+  font-size: 1.125rem;
+}
+
+.app-container.collapsed .user-profile {
+  justify-content: center;
+  padding: 12px;
+}
+
+/* ==================== MAIN CONTENT ==================== */
+.main-content {
+  flex: 1;
+  margin-left: 260px;
+  overflow-y: auto;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--surface-ground);
+  height: 100vh;
+}
+
+.app-container.collapsed .main-content {
+  margin-left: 80px;
+}
+
+/* ==================== SCROLLBAR STYLING ==================== */
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: var(--surface-border);
+  border-radius: 2px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}
+
+.main-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.main-content::-webkit-scrollbar-track {
+  background: var(--surface-ground);
+}
+
+.main-content::-webkit-scrollbar-thumb {
+  background: var(--surface-border);
+  border-radius: 4px;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 80px;
+  }
+
+  .brand,
+  .nav-label,
+  .user-info,
+  .profile-menu-btn,
+  .action-btn span:not(.pi) {
+    display: none;
+  }
+
+  .nav-item {
+    justify-content: center;
+    padding: 12px;
+  }
+
+  .action-btn {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto;
+  }
+
+  .user-profile {
+    justify-content: center;
+    padding: 12px;
+  }
+
+  .main-content {
+    margin-left: 80px;
+  }
+
+  .toggle-btn {
+    position: absolute;
+    right: -16px;
+    z-index: 10;
+  }
+}
+/* ==================== PROFILE MENU STYLING (with styleClass) ==================== */
+
+/* Menu Container */
+:host ::ng-deep .profile-menu-overlay.p-menu {
+  background: var(--surface-card) !important;
+  border: 1px solid var(--surface-border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+  padding: 8px !important;
+  min-width: 200px !important;
+  margin-top: 8px !important;
+}
+
+:host ::ng-deep .profile-menu-overlay .p-menu-list {
+  padding: 0 !important;
+}
+
+:host ::ng-deep .profile-menu-overlay .p-menuitem-link {
+  padding: 12px 16px !important;
+  border-radius: 8px !important;
+  color: var(--text-color) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  gap: 12px !important;
+}
+
+:host ::ng-deep .profile-menu-overlay .p-menuitem-link:not(.p-disabled):hover {
+  background: var(--surface-hover) !important;
+  color: var(--primary-color) !important;
+  transform: translateX(4px) !important;
+}
+
+:host ::ng-deep .profile-menu-overlay .p-menuitem-icon {
+  color: var(--text-color-secondary) !important;
+  font-size: 1.125rem !important;
+}
+
+:host ::ng-deep .profile-menu-overlay .p-menuitem-link:hover .p-menuitem-icon {
+  color: var(--primary-color) !important;
+}
+
+:host ::ng-deep .profile-menu-overlay .p-menuitem-text {
+  color: var(--text-color) !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+}
+
+:host ::ng-deep .profile-menu-overlay .p-menu-separator {
+  border-top: 1px solid var(--surface-border) !important;
+  margin: 8px 0 !important;
+}
+
+/* Logout Item Styling */
+:host ::ng-deep .profile-menu-overlay .p-menuitem:last-child .p-menuitem-link:hover {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: var(--red-600) !important;
+}
+
+:host ::ng-deep .profile-menu-overlay .p-menuitem:last-child .p-menuitem-link:hover .p-menuitem-icon,
+:host ::ng-deep .profile-menu-overlay .p-menuitem:last-child .p-menuitem-link:hover .p-menuitem-text {
+  color: var(--red-600) !important;
+}
+
+/* Dark Mode */
+.app-container.dark :host ::ng-deep .profile-menu-overlay.p-menu {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+.app-container.dark :host ::ng-deep .profile-menu-overlay .p-menuitem:last-child .p-menuitem-link:hover {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: var(--red-400) !important;
+}
+
+.app-container.dark :host ::ng-deep .profile-menu-overlay .p-menuitem:last-child .p-menuitem-link:hover .p-menuitem-icon,
+.app-container.dark :host ::ng-deep .profile-menu-overlay .p-menuitem:last-child .p-menuitem-link:hover .p-menuitem-text {
+  color: var(--red-400) !important;
+}
+
+/* Animation */
+:host ::ng-deep .profile-menu-overlay.p-menu {
+  animation: slideDown 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

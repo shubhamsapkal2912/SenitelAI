@@ -1,0 +1,175 @@
+<div class="login-container">
+  <!-- Left Panel: Hero Image -->
+  <div class="hero-panel">
+    <!-- Background Image -->
+    <div class="hero-background"></div>
+    
+    <!-- Overlay Gradient -->
+    <div class="hero-overlay-gradient"></div>
+    <div class="hero-overlay-blend"></div>
+    
+    <!-- Content Overlay -->
+    <div class="hero-content">
+      <div class="hero-text-wrapper">
+        <div class="status-badge">
+          <span class="status-indicator"></span>
+          <span class="status-text">System Operational</span>
+        </div>
+        
+        <h1 class="hero-title">
+          Smart City<br/>Traffic Intelligence
+        </h1>
+        
+        <p class="hero-description">
+          Advanced AI-powered monitoring for safer streets. Access real-time violation detection and traffic analytics.
+        </p>
+      </div>
+      
+      <div class="hero-footer">
+        <span>v4.2.0 Release</span>
+        <span>•</span>
+        <span>Enterprise Edition</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel: Login Form -->
+  <div class="form-panel">
+    <!-- Background Pattern -->
+    <div class="form-background-pattern"></div>
+    
+    <div class="form-wrapper">
+      <!-- Header -->
+      <div class="form-header">
+        <div class="brand-logo">
+          <i class="pi pi-shield"></i>
+          <span class="brand-text">Sentinel AI</span>
+        </div>
+        
+        <h2 class="form-title">Welcome back</h2>
+        <p class="form-subtitle">Please enter your credentials to access the portal.</p>
+      </div>
+
+      <!-- Error Messages -->
+      <p-messages 
+         
+        severity="error" 
+        class="login-error-messages"
+        *ngIf="messages.length > 0">
+      </p-messages>
+
+      <!-- Single Error Message (Fallback) -->
+      <div *ngIf="errorMessage && messages.length === 0" class="error-banner">
+        <i class="pi pi-exclamation-triangle"></i>
+        {{ errorMessage }}
+      </div>
+
+      <!-- Login Form -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <!-- Email Field -->
+        <div class="form-field">
+          <label for="email" class="field-label">Email Address</label>
+          <div class="p-input-icon-left input-wrapper">
+            <i class="pi pi-envelope"></i>
+            <input 
+              id="email"
+              type="email"
+              pInputText
+              formControlName="email"
+              placeholder="officer@city-traffic.gov"
+              class="w-full input-field"
+              [class.ng-invalid]="email?.invalid && email?.touched"
+            />
+          </div>
+          <small 
+            *ngIf="email?.invalid && email?.touched" 
+            class="error-message"
+          >
+            <span *ngIf="email?.errors?.['required']">Email is required</span>
+            <span *ngIf="email?.errors?.['email']">Please enter a valid email</span>
+          </small>
+        </div>
+
+        <!-- Password Field -->
+        <div class="form-field">
+          <label for="password" class="field-label">Password</label>
+          <div class="password-wrapper">
+            <div class="p-input-icon-left input-wrapper">
+              <i class="pi pi-lock"></i>
+              <input 
+                id="password"
+                [type]="isPasswordVisible ? 'text' : 'password'"
+                pInputText
+                formControlName="password"
+                placeholder="••••••••••••"
+                class="w-full input-field password-input"
+                [class.ng-invalid]="password?.invalid && password?.touched"
+              />
+              <i 
+                class="pi toggle-visibility"
+                [ngClass]="isPasswordVisible ? 'pi-eye' : 'pi-eye-slash'"
+                (click)="togglePasswordVisibility()"
+              ></i>
+            </div>
+          </div>
+          <small 
+            *ngIf="password?.invalid && password?.touched" 
+            class="error-message"
+          >
+            <span *ngIf="password?.errors?.['required']">Password is required</span>
+            <span *ngIf="password?.errors?.['minlength']">Password must be at least 8 characters</span>
+          </small>
+        </div>
+
+        <!-- Remember Me & Forgot Password -->
+        <div class="form-options">
+          <div class="remember-me">
+            <p-checkbox 
+              formControlName="rememberMe"
+              [binary]="true"
+              inputId="rememberMe"
+            />
+            <label for="rememberMe" class="remember-label">Remember me</label>
+          </div>
+          
+          <a 
+            (click)="onForgotPassword(); $event.preventDefault()"
+            class="forgot-password-link"
+          >
+            Forgot password?
+          </a>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="submit-wrapper">
+          <p-button 
+            type="submit"
+            label="Sign In to Portal"
+            icon="pi pi-sign-in"
+            [loading]="isSubmitting"
+            [disabled]="isSubmitting || loginForm.invalid"
+            styleClass="w-full submit-button"
+          />
+        </div>
+      </form>
+
+      <!-- Footer Links -->
+      <div class="form-footer">
+        <p class="footer-text">
+          Restricted Access. Authorized Personnel Only.<br/>
+          <a 
+            (click)="onContactAdmin(); $event.preventDefault()"
+            class="footer-link"
+          >
+            Contact System Administrator
+          </a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Bottom Copyright -->
+    <div class="copyright">
+      <span>© 2026 Smart City Solutions Inc.</span>
+    </div>
+  </div>
+</div>

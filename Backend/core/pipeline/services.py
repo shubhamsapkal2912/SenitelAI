@@ -27,7 +27,7 @@ def publish_pipeline_command(action: str, pipeline):
             "camera_id":           pipeline.camera.pk,
             "ml_model_id":         pipeline.ml_model.pk,          # ✅ add this
             "rtsp_url":            pipeline.camera.rtsp_url,
-            "model_file":          pipeline.ml_model.model_file.path,
+            "use_case":            pipeline.use_case,
             "threshold_parameter": pipeline.ml_model.threshold_parameter,
             "queue_name":          pipeline.queue_name,
             "throttle_ms":         1000,

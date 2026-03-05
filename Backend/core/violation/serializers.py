@@ -34,9 +34,9 @@ class ViolationSerializer(serializers.ModelSerializer):
     def validate(self, data):
         pipeline = data.get("pipeline")
 
-        if not pipeline.status:
+        if not pipeline.is_active:  
             raise serializers.ValidationError(
-                "Violation cannot be created because the pipeline is inactive."
-            )
+                "Violation cannot be created because the pipeline is not active."
+        )
 
         return data

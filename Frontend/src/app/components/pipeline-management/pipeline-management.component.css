@@ -1,0 +1,439 @@
+
+/* ==================== CONTAINER ==================== */
+
+.pipeline-management-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+  background: var(--surface-ground);
+}
+
+/* Content wrapper */
+
+.content-area {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ==================== PAGE HEADER ==================== */
+
+.page-header {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  border-bottom: 1px solid var(--surface-border);
+  background: var(--surface-card);
+}
+
+.page-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.divider {
+  height: 2rem;
+  width: 1px;
+  background: var(--surface-border);
+}
+
+/* ==================== METRIC CARDS ==================== */
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+  gap: 1.75rem;
+}
+
+.metric-card {
+  background: var(--surface-card);
+  border-radius: 10px;
+  padding: 1.5rem;
+  border: 1px solid var(--surface-border);
+  position: relative;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--card-shadow);
+}
+
+.metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metric-label {
+  font-size: 13px;
+  color: var(--text-color-secondary);
+}
+
+.metric-value {
+  font-size: 30px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.metric-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* PrimeNG theme based colors */
+
+.metric-icon.blue {
+  background: var(--blue-100);
+  color: var(--blue-600);
+}
+
+.metric-icon.green {
+  background: var(--green-100);
+  color: var(--green-600);
+}
+
+.metric-icon.orange {
+  background: var(--orange-100);
+  color: var(--orange-600);
+}
+
+.metric-progress {
+  margin-top: 12px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--surface-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--green-500);
+}
+
+.progress-label {
+  font-size: 12px;
+  color: var(--text-color-secondary);
+  margin-top: 4px;
+}
+
+/* ==================== TOOLBAR ==================== */
+
+.action-toolbar {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:1rem;
+}
+
+.toolbar-left {
+  display:flex;
+  align-items:center;
+  gap:0.75rem;
+  flex:1;
+}
+
+.search-wrapper {
+  width:320px;
+}
+
+/* ==================== TABLE CONTAINER ==================== */
+
+.table-container {
+  background: var(--surface-card);
+  border-radius: 10px;
+  border: 1px solid var(--surface-border);
+  overflow: hidden;
+}
+
+/* ==================== TABLE ==================== */
+
+.pipeline-table .p-datatable-wrapper table {
+  width:100%;
+}
+
+.pipeline-table .p-datatable-thead > tr > th {
+  font-size:12px;
+  text-transform:uppercase;
+  color:var(--text-color-secondary);
+  padding:14px 16px;
+}
+
+.pipeline-table .p-datatable-tbody > tr:hover {
+  background:var(--surface-hover);
+}
+
+.pipeline-table .p-datatable-tbody > tr.row-active {
+  border-left:3px solid var(--green-500);
+}
+
+.pipeline-table .p-datatable-tbody > tr.row-inactive {
+  border-left:3px solid var(--orange-400);
+  opacity:.9;
+}
+
+.pipeline-table .p-datatable-tbody > tr > td {
+  padding:16px;
+  vertical-align:middle;
+}
+
+/* ==================== PIPELINE INFO ==================== */
+
+.pipeline-info {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.pipeline-icon-wrapper {
+  width:38px;
+  height:38px;
+  border-radius:8px;
+  background:var(--surface-ground);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.pipeline-details {
+  display:flex;
+  flex-direction:column;
+}
+
+.pipeline-camera {
+  font-weight:600;
+  color:var(--text-color);
+}
+
+.pipeline-model {
+  font-size:12px;
+  color:var(--text-color-secondary);
+}
+
+/* ==================== STATUS ==================== */
+
+.status-cell {
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.status-indicator {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.pulse-dot {
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:var(--orange-400);
+}
+
+.status-indicator[data-status="active"] .pulse-dot {
+  background:var(--green-500);
+}
+
+/* ==================== QUEUE ==================== */
+
+.queue-name {
+  font-family:monospace;
+  background:var(--surface-ground);
+  padding:4px 8px;
+  border-radius:4px;
+  border:1px solid var(--surface-border);
+  font-size:12px;
+}
+
+/* ==================== DATE INFO ==================== */
+
+.date-info {
+  display:flex;
+  flex-direction:column;
+}
+
+.date-primary {
+  font-size:13px;
+  font-weight:500;
+}
+
+.date-secondary {
+  font-size:11px;
+  color:var(--text-color-secondary);
+}
+
+/* ==================== ACTION BUTTONS ==================== */
+
+.action-buttons {
+  display:flex;
+  gap:4px;
+}
+
+/* ==================== EMPTY STATE ==================== */
+
+.empty-state {
+  padding:40px;
+  text-align:center;
+}
+
+.empty-icon {
+  font-size:32px;
+  color:var(--text-color-secondary);
+}
+
+.empty-title {
+  margin-top:10px;
+  font-weight:600;
+}
+
+.empty-subtitle {
+  font-size:13px;
+  color:var(--text-color-secondary);
+}
+
+
+/* ==================== ADD PIPELINE DIALOG ==================== */
+
+.add-pipeline-dialog .p-dialog-content {
+  padding:1.75rem;
+}
+
+.dialog-form {
+  display:flex;
+  flex-direction:column;
+  gap:1.4rem;
+}
+
+/* Form Field */
+
+.form-field {
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.form-field label {
+  font-size:13px;
+  font-weight:600;
+  color:var(--text-color);
+}
+
+.required {
+  color:var(--red-500);
+}
+
+/* Dropdown full width */
+
+.add-pipeline-dialog .p-dropdown {
+  width:100%;
+}
+
+.w-full {
+  width:100%;
+}
+
+.p-dropdown-panel {
+  min-width:inherit;
+}
+
+/* Footer */
+
+.dialog-footer {
+  display:flex;
+  justify-content:flex-end;
+  gap:0.75rem;
+  width:100%;
+}
+
+/* ==================== PAGINATION ==================== */
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-top: 1px solid var(--surface-border);
+  background: var(--surface-card);
+}
+
+/* Info text */
+
+.pagination-info {
+  font-size: 13px;
+  color: var(--text-color-secondary);
+}
+
+/* Paginator container */
+
+.p-paginator {
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+/* Page buttons */
+
+.p-paginator .p-paginator-page,
+.p-paginator .p-paginator-prev,
+.p-paginator .p-paginator-next,
+.p-paginator .p-paginator-first,
+.p-paginator .p-paginator-last {
+  min-width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  margin: 0 2px;
+}
+
+/* Active page */
+
+.p-paginator .p-paginator-page.p-highlight {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--primary-color-text);
+}
+
+/* Hover state */
+
+.p-paginator .p-paginator-page:hover {
+  background: var(--surface-hover);
+}
+
+/* Disabled buttons */
+
+.p-paginator .p-disabled {
+  opacity: 0.5;
+}
+
+/* Rows dropdown */
+
+.p-paginator .p-dropdown {
+  height: 34px;
+  align-items: center;
+}
+
+/* Paginator icons */
+
+.p-paginator .p-paginator-icon {
+  font-size: 14px;
+}

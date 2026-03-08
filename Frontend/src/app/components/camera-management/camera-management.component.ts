@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ConfigService } from '../../services/config.service';
-import { 
-  Camera, 
+import {
+  Camera,
   CameraListResponse,
-  CameraCreatePayload 
+  CameraCreatePayload
 } from '../../helpers/model/models';
 
 // PrimeNG Imports
@@ -68,13 +68,18 @@ export class CameraManagementComponent implements OnInit {
 
   // Modal state
   editingCamera: Camera | null = null;
-  currentCamera: CameraCreatePayload = { name: '', rtsp_url: '', location: '' };
+  currentCamera: CameraCreatePayload = {
+    name: '',
+    rtsp_url: '',
+    location: '',
+    status: 'active'
+  };
 
   constructor(
     private configService: ConfigService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadCameras();
@@ -82,18 +87,17 @@ export class CameraManagementComponent implements OnInit {
 
   loadCameras(): void {
     this.loading = true;
-    
+
     const params = new URLSearchParams();
     params.set('page', this.currentPage.toString());
-    params.set('page_size', this.rows.toString()); 
+    params.set('page_size', this.rows.toString());
+
     if (this.searchQuery.trim()) {
       params.set('search', this.searchQuery.trim());
     }
 
-    const options = { params: params.toString() };
-
-    this.configService.get('api/cameras/').subscribe({
-      next: (response) => {
+    this.configService.get(`api/cameras/?${params.toString()}`).subscribe({
+      next: (response: CameraListResponse) => {
         this.cameras = response.results;
         this.totalRecords = response.count;
         this.updateMetrics();
@@ -126,17 +130,25 @@ export class CameraManagementComponent implements OnInit {
 
   addNewCamera(): void {
     this.editingCamera = null;
-    this.currentCamera = { name: '', rtsp_url: '', location: '' };
+    this.currentCamera = {
+      name: '',
+      rtsp_url: '',
+      location: '',
+      status: 'active'
+    };
     this.showDialog = true;
   }
 
   editCamera(camera: Camera): void {
     this.editingCamera = camera;
-    this.currentCamera = { 
-      name: camera.name, 
-      rtsp_url: camera.rtsp_url, 
-      location: camera.location 
+
+    this.currentCamera = {
+      name: camera.name || '',
+      rtsp_url: camera.rtsp_url || '',
+      location: camera.location || '',
+      status: camera.status || 'active'
     };
+
     this.showDialog = true;
   }
 
@@ -164,7 +176,7 @@ export class CameraManagementComponent implements OnInit {
     }
 
     this.loading = true;
-    
+
     if (this.editingCamera) {
       // Update existing
       this.configService.patch(`api/cameras/${this.editingCamera.id}/`, this.currentCamera).subscribe({
@@ -215,7 +227,7 @@ export class CameraManagementComponent implements OnInit {
   toggleCameraStatus(camera: Camera): void {
     const newStatus = camera.status === 'active' ? 'inactive' : 'active';
     const action = camera.status === 'active' ? 'pause' : 'activate';
-    
+
     this.confirmationService.confirm({
       message: `Are you sure you want to ${action} camera "${camera.name}"?`,
       header: `Confirm ${action.charAt(0).toUpperCase() + action.slice(1)}`,
@@ -225,7 +237,7 @@ export class CameraManagementComponent implements OnInit {
       accept: () => {
         this.loading = true;
         const payload = { status: newStatus };
-        
+
         this.configService.patch(`api/cameras/${camera.id}/`, payload).subscribe({
           next: () => {
             this.messageService.add({
@@ -319,7 +331,8 @@ export class CameraManagementComponent implements OnInit {
     const classes: Record<string, string> = {
       active: 'row-active',
       inactive: 'row-inactive',
-      maintenance: 'row-maintenance'
+
+
     };
     return classes[status] || '';
   }
@@ -351,10 +364,12 @@ export class CameraManagementComponent implements OnInit {
 
   private updateMetrics(): void {
     const activeCount = this.cameras.filter(c => c.status === 'active').length;
+    const inactiveCount = this.cameras.filter(c => c.status === 'inactive').length;
+
     this.metrics = {
       totalDeployed: this.totalRecords,
       active: activeCount,
-      inactive: this.totalRecords - activeCount,
+      inactive: inactiveCount,
       uptimePercentage: 97.3
     };
   }

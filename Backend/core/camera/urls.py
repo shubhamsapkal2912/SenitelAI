@@ -1,7 +1,12 @@
-from rest_framework.routers import DefaultRouter
-from .views import CameraViewSet
+from django.urls import path
+from .views import (
+    CameraListCreateAPIView,
+    CameraDetailAPIView,
+    ActiveCameraAPIView
+)
 
-router = DefaultRouter()
-router.register(r"cameras", CameraViewSet, basename="camera")
-
-urlpatterns = router.urls
+urlpatterns = [
+    path("cameras/", CameraListCreateAPIView.as_view(), name="camera-list"),
+    path("cameras/<int:pk>/", CameraDetailAPIView.as_view(), name="camera-detail"),
+    path("cameras/active/", ActiveCameraAPIView.as_view(), name="active-cameras"),
+]

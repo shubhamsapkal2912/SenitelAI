@@ -19,6 +19,7 @@ export interface CameraCreatePayload {
   name: string;
   rtsp_url: string;
   location: string;
+  status?: 'active' | 'inactive' | 'maintenance';
 }
 
 export interface CameraStatusCounts {

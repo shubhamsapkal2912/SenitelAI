@@ -1,12 +1,13 @@
-from rest_framework import viewsets, status
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
 from .models import Camera
 from .serializers import CameraSerializer
 from .pagination import CameraPagination
 
 
-class CameraViewSet(viewsets.ModelViewSet):
+class CameraListCreateAPIView(generics.ListCreateAPIView):
     queryset = Camera.objects.all()
     serializer_class = CameraSerializer
     permission_classes = [IsAuthenticated]
@@ -20,3 +21,17 @@ class CameraViewSet(viewsets.ModelViewSet):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class CameraDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Camera.objects.all()
+    serializer_class = CameraSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class ActiveCameraAPIView(generics.ListAPIView):
+    serializer_class = CameraSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Camera.objects.filter(status="active")

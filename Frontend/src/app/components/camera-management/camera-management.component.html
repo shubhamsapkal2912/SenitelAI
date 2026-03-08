@@ -1,3 +1,5 @@
+<p-toast position="top-right"></p-toast>
+<p-confirmDialog></p-confirmDialog>
 <!-- Complete camera-management.component.html -->
 <div class="camera-management-container">
   <!-- Toast Notifications -->
@@ -191,12 +193,8 @@
             <td>
               <div class="camera-info">
                 <!-- Fallback avatar if no thumbnail -->
-                <div class="camera-avatar" [style.background]="'hsl(' + (camera.id % 360) + ', 70%, 60%)'">
-                  {{ camera.name.charAt(0).toUpperCase() }}
-                </div>
-                <div class="camera-details">
+   <div class="camera-details">
                   <div class="camera-name">{{ camera.name }}</div>
-                  <div class="camera-id">#{{ camera.id }}</div>
                 </div>
               </div>
             </td>
@@ -221,45 +219,28 @@
                   [severity]="getStatusSeverity(camera.status)"
                   styleClass="status-tag"
                 />
-                <small class="status-date">{{ getRelativeTime(camera.created_at) }}</small>
+               
               </div>
             </td>
             
           <td class="text-right">
-  <div class="action-buttons">
-    <button
-      pButton
-      icon="pi pi-eye"
-      class="p-button-rounded p-button-text p-button-success action-btn"
-      pTooltip="View Live Feed"
-      (click)="viewFeed(camera)"
-    ></button>
-    
-    <button
-      pButton
-      icon="pi pi-pencil"
-      class="p-button-rounded p-button-text p-button-info action-btn"
-      pTooltip="Edit Camera"
-      (click)="editCamera(camera)"
-    ></button>
-    
-    <button
-      pButton
-      [icon]="camera.status === 'active' ? 'pi pi-pause-circle' : 'pi pi-play'"
-      class="p-button-rounded p-button-text action-btn"
-      [severity]="camera.status === 'active' ? 'warning' : 'success'"
-      pTooltip="{{ camera.status === 'active' ? 'Pause Camera' : 'Activate Camera' }}"
-      (click)="toggleCameraStatus(camera)"
-    ></button>
-    
-    <button
-      pButton
-      icon="pi pi-trash"
-      class="p-button-rounded p-button-text p-button-danger action-btn"
-      pTooltip="Delete Camera"
-      (click)="deleteCamera(camera)"
-    ></button>
-  </div>
+ <div class="action-buttons">
+  <button
+    pButton
+    icon="pi pi-pencil"
+    class="p-button-rounded p-button-text p-button-info action-btn"
+    pTooltip="Edit Camera"
+    (click)="editCamera(camera)"
+  ></button>
+
+  <button
+    pButton
+    icon="pi pi-trash"
+    class="p-button-rounded p-button-text p-button-danger action-btn"
+    pTooltip="Delete Camera"
+    (click)="deleteCamera(camera)"
+  ></button>
+</div>
 </td>
 
           </tr>
@@ -315,6 +296,19 @@
       <label for="location">Location <span class="required">*</span></label>
       <input id="location" pInputText [(ngModel)]="currentCamera.location" placeholder="e.g., Main St & 5th Ave" />
     </div>
+    <div class="p-field">
+  <label for="status">Status</label>
+
+  <select
+    id="status"
+    pInputText
+    [(ngModel)]="currentCamera.status"
+  >
+    <option value="active">Active</option>
+    <option value="inactive">Inactive</option>
+    <option value="maintenance">Maintenance</option>
+  </select>
+</div>
   </div>
 
   <ng-template pTemplate="footer">

@@ -1,0 +1,305 @@
+<p-toast position="top-right" />
+<p-confirmDialog />
+
+<div class="pipeline-management-container">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <header class="page-header">
+    <h1 class="page-title">Pipeline Management</h1>
+    <div class="header-actions">
+      <div class="icon-btn">
+        <p-button icon="pi pi-bell" [rounded]="true" [text]="true"
+          styleClass="icon-btn" pBadge value="3" badgeSeverity="danger"
+          (click)="openNotifications()" />
+      </div>
+      <div class="divider"></div>
+      <p-button icon="pi pi-question-circle" label="Support" [text]="true"
+        styleClass="support-btn" (click)="openSupport()" />
+    </div>
+  </header>
+
+  <div class="content-area">
+
+    <!-- ===== METRICS GRID ===== -->
+    <div class="metrics-grid">
+
+      <!-- Total -->
+      <div class="metric-card">
+        <div class="metric-decoration"></div>
+        <div class="metric-content">
+          <div class="metric-header">
+            <div>
+              <p class="metric-label">Total Pipelines</p>
+              <p class="metric-value">{{ metrics.total }}</p>
+            </div>
+            <div class="metric-icon blue"><i class="pi pi-sitemap"></i></div>
+          </div>
+          <div class="metric-footer">
+            <p-tag styleClass="metric-tag" severity="info" value="All Pipelines" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Active -->
+      <div class="metric-card">
+        <div class="metric-decoration green"></div>
+        <div class="metric-content">
+          <div class="metric-header">
+            <div>
+              <p class="metric-label">Active Pipelines</p>
+              <p class="metric-value">{{ metrics.active }}</p>
+            </div>
+            <div class="metric-icon green"><i class="pi pi-play-circle"></i></div>
+          </div>
+          <div class="metric-progress">
+            <div class="progress-bar">
+              <div class="progress-fill"
+                [style.width.%]="metrics.total ? (metrics.active / metrics.total) * 100 : 0">
+              </div>
+            </div>
+            <p class="progress-label">{{ metrics.active }} / {{ metrics.total }} active</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inactive -->
+      <div class="metric-card">
+        <div class="metric-decoration orange"></div>
+        <div class="metric-content">
+          <div class="metric-header">
+            <div>
+              <p class="metric-label">Inactive Pipelines</p>
+              <p class="metric-value">{{ metrics.inactive }}</p>
+            </div>
+            <div class="metric-icon orange"><i class="pi pi-stop-circle"></i></div>
+          </div>
+          <div class="metric-footer">
+            <p-tag styleClass="metric-tag" severity="warning" value="Needs Attention" />
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== ACTION TOOLBAR ===== -->
+    <div class="action-toolbar">
+      <div class="toolbar-left">
+        <div class="search-wrapper">
+          <!-- PrimeNG v17+: use p-iconfield / p-inputicon -->
+          <!-- PrimeNG v14 fallback: <span class="p-input-icon-left"><i class="pi pi-search"></i><input pInputText .../></span> -->
+          <p-iconField iconPosition="left">
+  <p-inputIcon styleClass="pi pi-search" />
+  <input pInputText type="text" placeholder="Search pipelines..."
+    [(ngModel)]="searchQuery" (input)="onSearch()" />
+</p-iconField>
+        </div>
+        <p-button icon="pi pi-filter" label="Filter" [outlined]="true" styleClass="toolbar-btn" />
+        <p-button icon="pi pi-sort-alt" label="Sort"  [outlined]="true" styleClass="toolbar-btn" />
+      </div>
+      <p-button icon="pi pi-plus" label="Add Pipeline"
+        styleClass="add-btn" (click)="addNewPipeline()" />
+    </div>
+
+    <!-- ===== TABLE CONTAINER ===== -->
+    <div class="table-container">
+      <p-table [value]="paginatedPipelines" [loading]="loading"
+        styleClass="pipeline-table" [scrollable]="true" scrollHeight="500px">
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Pipeline</th>
+            <th>Status</th>
+            <th>Queue Name</th>
+            <th>Created</th>
+            <th class="actions-th">Actions</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-pipeline>
+          <tr class="table-row" [ngClass]="pipeline.is_active ? 'row-active' : 'row-inactive'">
+
+            <!-- Pipeline Info -->
+            <td>
+              <div class="pipeline-info">
+                <div class="pipeline-icon-wrapper">
+                  <i class="pi pi-sitemap"></i>
+                </div>
+                <div class="pipeline-details">
+                  <span class="pipeline-camera">{{ pipeline.camera_name }}</span>
+                  <span class="pipeline-model">{{ pipeline.model_name }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Status -->
+            <td>
+              <div class="status-cell">
+                <div class="status-indicator"
+                  [attr.data-status]="pipeline.is_active ? 'active' : 'inactive'">
+                  <span class="pulse-ring" *ngIf="pipeline.is_active"></span>
+                  <span class="pulse-dot"></span>
+                </div>
+                <div class="status-info">
+                  <p-tag
+                    [severity]="getStatusSeverity(pipeline.is_active)"
+                    [value]="getStatusLabel(pipeline.is_active)"
+                    styleClass="status-tag" />
+                </div>
+              </div>
+            </td>
+
+            <!-- Queue Name -->
+            <td>
+              <span class="queue-name">{{ pipeline.queue_name || '—' }}</span>
+            </td>
+
+            <!-- Created At -->
+            <td>
+              <div class="date-info">
+                <span class="date-primary">{{ pipeline.created_at | date:'mediumDate' }}</span>
+                <span class="date-secondary">{{ getRelativeTime(pipeline.created_at) }}</span>
+              </div>
+            </td>
+
+            <!-- Actions -->
+            <td>
+              <div class="action-buttons">
+                <p-button *ngIf="canStart(pipeline)"
+                  icon="pi pi-play" [rounded]="true" [text]="true"
+                  severity="success" styleClass="action-btn"
+                  pTooltip="Start Pipeline" tooltipPosition="top"
+                  (click)="startPipeline(pipeline)" />
+                <p-button *ngIf="canStop(pipeline)"
+                  icon="pi pi-stop" [rounded]="true" [text]="true"
+                  severity="warning" styleClass="action-btn"
+                  pTooltip="Stop Pipeline" tooltipPosition="top"
+                  (click)="stopPipeline(pipeline)" />
+                <p-button
+                  icon="pi pi-trash" [rounded]="true" [text]="true"
+                  severity="danger" styleClass="action-btn"
+                  pTooltip="Delete Pipeline" tooltipPosition="top"
+                  (click)="deletePipeline(pipeline)" />
+              </div>
+            </td>
+
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5">
+              <div class="empty-state">
+                <i class="pi pi-sitemap empty-icon"></i>
+                <p class="empty-title">No pipelines found</p>
+                <p class="empty-subtitle">Try adjusting your search or add a new pipeline</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+      </p-table>
+
+      <!-- Pagination -->
+      <div class="pagination-wrapper">
+        <span class="pagination-info">
+          Showing
+          <span class="font-medium">{{ first + 1 }}</span>
+          to
+          <span class="font-medium">{{ (first + rows > totalRecords ? totalRecords : first + rows) }}</span>
+          of
+          <span class="font-medium">{{ totalRecords }}</span>
+          results
+        </span>
+       <p-paginator
+  [first]="first"
+  [rows]="5"
+  [totalRecords]="totalRecords"
+  (onPageChange)="onPageChange($event)">
+</p-paginator>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== ADD PIPELINE DIALOG ===== -->
+<p-dialog
+  header="Add New Pipeline"
+  [(visible)]="showDialog"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '420px' }"
+  styleClass="add-pipeline-dialog"
+  (visibleChange)="onDialogVisibleChange($event)"
+>
+
+  <div class="dialog-form">
+
+    <!-- Camera -->
+    <div class="form-field">
+      <label for="cameraSelect">
+        Camera <span class="required">*</span>
+      </label>
+
+      <p-dropdown
+  inputId="cameraSelect"
+  [options]="cameraOptions"
+  [(ngModel)]="currentPipeline.camera"
+  placeholder="Select a camera"
+  [filter]="true"
+  filterBy="label"
+  [showClear]="true"
+  optionLabel="label"
+  optionValue="value"
+  appendTo="body"
+  styleClass="w-full">
+</p-dropdown>
+    </div>
+
+    <!-- Model -->
+    <div class="form-field">
+      <label for="modelSelect">
+        ML Model <span class="required">*</span>
+      </label>
+
+      <p-dropdown
+  inputId="modelSelect"
+  [options]="modelOptions"
+  [(ngModel)]="currentPipeline.ml_model"
+  placeholder="Select an ML model"
+  [filter]="true"
+  filterBy="label"
+  [showClear]="true"
+  optionLabel="label"
+  optionValue="value"
+  appendTo="body"
+  styleClass="w-full">
+</p-dropdown>
+    </div>
+
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+
+      <p-button
+        label="Cancel"
+        icon="pi pi-times"
+        [text]="true"
+        (click)="closeDialog()"
+      ></p-button>
+
+      <p-button
+        label="Create Pipeline"
+        icon="pi pi-plus"
+        [disabled]="!isFormValid() || loading"
+        [loading]="loading"
+        (click)="savePipeline()"
+      ></p-button>
+
+    </div>
+  </ng-template>
+
+</p-dialog>

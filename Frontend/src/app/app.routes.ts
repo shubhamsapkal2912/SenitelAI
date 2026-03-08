@@ -28,6 +28,11 @@ export const routes: Routes = [
         title: 'Camera Management'
       },
       {
+        path: 'pipeline-management',
+        loadComponent: () => import('./components/pipeline-management/pipeline-management.component').then(m => m.PipelineManagementComponent),
+        title: 'Pipeline Management'
+      },
+      {
         path: 'overview',
         loadComponent: () => import('./components/dashboard-overview/dashboard-overview.component').then(m => m.DashboardOverviewComponent),
         title: 'Dashboard Overview'

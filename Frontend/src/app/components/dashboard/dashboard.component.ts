@@ -104,6 +104,12 @@ export class DashboardComponent implements OnInit {
       routerLink: '/dashboard/camera-management'
     },
     {
+      id:'pipelines',
+      icon: 'wrench',
+      label: 'Pipeline Management',
+      routerLink: '/dashboard/pipeline-management'
+    },
+    {
       id: 'analytics',
       icon: 'chart-line',
       label: 'Analytics',

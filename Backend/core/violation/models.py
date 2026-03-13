@@ -21,7 +21,15 @@ class Violation(models.Model):
         blank=True
     )
 
-    # ✅ stores YOLO bbox data — list of detection dicts
+    # ✅ NEW FIELD
+    plate_number = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        db_index=True
+    )
+
+    # YOLO detections
     detections = models.JSONField(default=list, blank=True)
 
     def __str__(self):

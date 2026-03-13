@@ -15,28 +15,36 @@ class BBoxSerializer(serializers.Serializer):
 
 
 class DetectionSerializer(serializers.Serializer):
-    label      = serializers.CharField()
-    class_id   = serializers.IntegerField()
-    confidence = serializers.FloatField()
-    bbox       = BBoxSerializer()
+    label        = serializers.CharField()
+    class_id     = serializers.IntegerField()
+    confidence   = serializers.FloatField()
+    bbox         = BBoxSerializer()
+    
 
 
 class ViolationSerializer(serializers.ModelSerializer):
     frame_image = Base64ImageField(required=False, allow_null=True)
 
-    # ✅ accepts list of detection dicts from YOLO worker
-    detections = DetectionSerializer(many=True, required=False, default=list)
+    # optional plate number extracted by worker
+    plate_number = serializers.CharField(required=False, allow_null=True)
+
+    # YOLO detections
+    detections = DetectionSerializer(
+        many=True,
+        required=False,
+        default=list
+    )
 
     class Meta:
         model  = Violation
-        fields = '__all__'
+        fields = "__all__"
 
     def validate(self, data):
         pipeline = data.get("pipeline")
 
-        if not pipeline.is_active:  
+        if pipeline and not pipeline.is_active:
             raise serializers.ValidationError(
                 "Violation cannot be created because the pipeline is not active."
-        )
+            )
 
         return data

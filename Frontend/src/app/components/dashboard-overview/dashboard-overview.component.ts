@@ -7,7 +7,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { ConfigService } from '../../services/config.service';
 import { MessageService } from 'primeng/api';
-
+import { CalendarModule } from 'primeng/calendar';
+import { FormsModule } from '@angular/forms';
 interface MLModelAnalytics {
   id: number;
   name: string;
@@ -38,7 +39,9 @@ interface LiveAlert {
     TooltipModule,
     RippleModule,
     InputTextModule,
-    NgxChartsModule   // ✅ ngx-charts
+    NgxChartsModule,   // ✅ ngx-charts
+    CalendarModule,
+    FormsModule
   ],
   templateUrl: './dashboard-overview.component.html',
   styleUrls: ['./dashboard-overview.component.css'],
@@ -54,7 +57,8 @@ export class DashboardOverviewComponent implements OnInit {
   systemHealthPercent: number = 98;
   totalCameras: number = 42;
   activeCameras: number = 41;
- 
+  selectedMonth: Date = new Date();
+  maxDate: Date = new Date();
 yAxisTickFormatting = (value: number) => {
   if (value % 1 !== 0) return ''; // hide 0.25, 0.5, 0.75 etc.
   return Math.round(value).toString();
@@ -119,7 +123,11 @@ view: [number, number] = [0, 300]; // ✅ 0 width = auto-fill container width
     this.loadViolationAnalytics();
     this.loadMonthlyTrends();
   }
-
+formatMonthYear(date: Date): string {
+  const month = date.toLocaleString('default', { month: 'long' });
+  const year = date.getFullYear();
+  return `${month}_${year}`;
+}
   loadViolationAnalytics(): void {
     this.loadingAnalytics = true;
     this.configService.get('api/violations/analytics/').subscribe({
@@ -145,53 +153,89 @@ view: [number, number] = [0, 300]; // ✅ 0 width = auto-fill container width
       }
     });
   }
-
+onMonthChange(): void {
+  this.loadMonthlyTrends();
+}
 loadMonthlyTrends(): void {
+
   this.loadingTrends = true;
-  this.configService.get('api/violations/monthly-trends/').subscribe({
-    next: (response: any) => {
-      this.currentMonth = response.current_month || '';
-      const rawTrends = response.monthly_trends || [];
 
-      // ✅ Build a map of day → total from API response
-      const dataMap = new Map<number, number>();
-      rawTrends.forEach((trend: any) => {
-        dataMap.set(trend.day, trend.total);
-      });
+  const monthParam = this.formatMonthYear(this.selectedMonth);
 
-      // ✅ Get today's date to know the range end
-      const today = new Date();
-      const currentDay = today.getDate(); // e.g. 23 for Feb 23
+  this.configService
+    .get(`api/violations/monthly-trends/${monthParam}/`)
+    .subscribe({
 
-      // ✅ Fill ALL days from 1 to today with 0 if no data
-      const fullSeries = [];
-      for (let day = 1; day <= currentDay; day++) {
-        fullSeries.push({
-          name: `${day}`,           // "1", "2", ... "23"
-          value: dataMap.get(day) ?? 0
+      next: (response: any) => {
+
+        this.currentMonth = response.current_month || '';
+
+        const rawTrends = response.monthly_trends || [];
+
+        // Map API data → day : total
+        const dataMap = new Map<number, number>();
+        rawTrends.forEach((trend: any) => {
+          dataMap.set(trend.day, trend.total);
         });
+
+
+        const today = new Date();
+
+        const selectedYear  = this.selectedMonth.getFullYear();
+        const selectedMonth = this.selectedMonth.getMonth();
+
+        const currentYear   = today.getFullYear();
+        const currentMonth  = today.getMonth();
+
+        // Determine if selected month is current month
+        const isCurrentMonth =
+          selectedYear === currentYear &&
+          selectedMonth === currentMonth;
+
+        // Determine last day to display
+        const lastDay = isCurrentMonth
+          ? today.getDate()
+          : new Date(selectedYear, selectedMonth + 1, 0).getDate();
+
+
+        const fullSeries = [];
+
+        for (let day = 1; day <= lastDay; day++) {
+          fullSeries.push({
+            name: `${day}`,
+            value: dataMap.get(day) ?? 0
+          });
+        }
+
+
+        // ngx-charts requires multi-series format
+        this.lineChartData = [
+          {
+            name: 'Violations',
+            series: fullSeries
+          }
+        ];
+
+        this.loadingTrends = false;
+
+      },
+
+      error: (error) => {
+
+        console.error('Error loading monthly trends:', error);
+
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load monthly trends'
+        });
+
+        this.loadingTrends = false;
+
       }
 
-      // ✅ Wrap in multi-series format for ngx-charts
-      this.lineChartData = [
-        {
-          name: 'Violations',
-          series: fullSeries
-        }
-      ];
+    });
 
-      this.loadingTrends = false;
-    },
-    error: (error) => {
-      console.error('Error loading monthly trends:', error);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to load monthly trends'
-      });
-      this.loadingTrends = false;
-    }
-  });
 }
 
 get yScaleMax(): number {

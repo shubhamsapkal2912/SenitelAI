@@ -1,6 +1,8 @@
 <div class="app-container" [class.dark]="isDark()" [class.collapsed]="isCollapsed()">
+
   <!-- Sidebar -->
   <aside class="sidebar">
+
     <!-- Sidebar Header -->
     <div class="sidebar-header">
       <div class="logo">
@@ -10,15 +12,6 @@
         <h1>Sentinel AI</h1>
         <p>Traffic Intelligence</p>
       </div>
-      <button 
-        class="toggle-btn" 
-        (click)="toggleCollapse()"
-        pRipple
-        [pTooltip]="isCollapsed() ? 'Expand Sidebar' : 'Collapse Sidebar'"
-        tooltipPosition="right"
-      >
-        <i class="pi" [ngClass]="isCollapsed() ? 'pi-angle-right' : 'pi-angle-left'"></i>
-      </button>
     </div>
 
     <!-- Navigation -->
@@ -42,16 +35,20 @@
 
     <!-- Sidebar Footer -->
     <div class="sidebar-footer">
-      <!-- Theme Toggle -->
+
+      <!-- Sidebar Collapse / Expand Toggle -->
       <button
-        class="action-btn"
-        (click)="toggleTheme()"
+        class="action-btn collapse-btn"
+        (click)="toggleCollapse()"
         pRipple
-        [pTooltip]="isDark() ? 'Light Mode' : 'Dark Mode'"
+        [pTooltip]="isCollapsed() ? 'Expand Sidebar' : 'Collapse Sidebar'"
         tooltipPosition="right"
       >
-        <i class="pi" [ngClass]="isDark() ? 'pi-sun' : 'pi-moon'"></i>
-        <span *ngIf="!isCollapsed()">{{ isDark() ? 'Light' : 'Dark' }} Mode</span>
+        <i
+          class="pi"
+          [ngClass]="isCollapsed() ? 'pi-angle-double-right' : 'pi-angle-double-left'"
+        ></i>
+        <span *ngIf="!isCollapsed()">Collapse</span>
       </button>
 
       <!-- User Profile with Menu -->
@@ -79,12 +76,13 @@
       </div>
 
       <!-- Profile Overlay Menu -->
-      <p-menu 
-        #profileMenu 
-        [model]="profileMenuItems" 
+      <p-menu
+        #profileMenu
+        [model]="profileMenuItems"
         [popup]="true"
         styleClass="profile-menu-overlay"
       ></p-menu>
+
     </div>
   </aside>
 
@@ -92,4 +90,5 @@
   <main class="main-content">
     <router-outlet></router-outlet>
   </main>
+
 </div>

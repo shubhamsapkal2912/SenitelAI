@@ -6,21 +6,84 @@ from .views import (
     ViolationAnalyticsView,
     ViolationMonthlyTrendsView,
     ViolationDetectionsView,
+    ViolationCountStatsView,
+    ViolationExcelExportView,
+    ViolationPeriodReportView,
+    ViolationModelAnalyticsView,   # ✅ new
+    ViolationCameraWiseView,       # ✅ new
+    ViolationLocationWiseView,     # ✅ new
 )
 
 router = DefaultRouter()
-router.register(r'violations', ViolationViewSet, basename='violation')
+router.register(r"violations", ViolationViewSet, basename="violation")
 
 urlpatterns = [
-    # ⚠️ Specific paths MUST come before router.urls
-    # to prevent <pk> from swallowing "analytics" / "monthly-trends"
-    path('violations/analytics/',           ViolationAnalyticsView.as_view(),     name='violation-analytics'),
+    # ── Analytics summary (supports ?month=March_2026) ──────────────────────
     path(
-    'violations/monthly-trends/<str:month_year>/',
-    ViolationMonthlyTrendsView.as_view(),
-    name='violation-monthly-trends'
-),
-    path('violations/<int:pk>/detections/', ViolationDetectionsView.as_view(),    name='violation-detections'),
+        "violations/analytics/",
+        ViolationAnalyticsView.as_view(),
+        name="violation-analytics",
+    ),
 
-    path('', include(router.urls)),
+    # ── ✅ Per-model analytics ────────────────────────────────────────────────
+    # GET /violations/analytics/model/<model_id>/?month=March_2026
+    path(
+        "violations/analytics/model/<int:model_id>/",
+        ViolationModelAnalyticsView.as_view(),
+        name="violation-model-analytics",
+    ),
+
+    # ── ✅ Camera-wise comparison ─────────────────────────────────────────────
+    # GET /violations/analytics/camera-wise/?cameras=1,2,3&month=March_2026
+    path(
+        "violations/analytics/camera-wise/",
+        ViolationCameraWiseView.as_view(),
+        name="violation-camera-wise",
+    ),
+
+    # ── ✅ Location-wise analytics ────────────────────────────────────────────
+    # GET /violations/analytics/location-wise/?month=March_2026&top=10
+    path(
+        "violations/analytics/location-wise/",
+        ViolationLocationWiseView.as_view(),
+        name="violation-location-wise",
+    ),
+
+    # ── Monthly trends ────────────────────────────────────────────────────────
+    path(
+        "violations/monthly-trends/<str:month_year>/",
+        ViolationMonthlyTrendsView.as_view(),
+        name="violation-monthly-trends",
+    ),
+
+    # ── Count stats ───────────────────────────────────────────────────────────
+    path(
+        "violations/count-stats/",
+        ViolationCountStatsView.as_view(),
+        name="violation-count-stats",
+    ),
+
+    # ── Excel export ──────────────────────────────────────────────────────────
+    path(
+        "violations/export/excel/",
+        ViolationExcelExportView.as_view(),
+        name="violation-export-excel",
+    ),
+
+    # ── Period report ─────────────────────────────────────────────────────────
+    path(
+        "violations/period-report/",
+        ViolationPeriodReportView.as_view(),
+        name="violation-period-report",
+    ),
+
+    # ── Per-violation detections ──────────────────────────────────────────────
+    path(
+        "violations/<int:pk>/detections/",
+        ViolationDetectionsView.as_view(),
+        name="violation-detections",
+    ),
+
+    # ── Router (always last) ──────────────────────────────────────────────────
+    path("", include(router.urls)),
 ]

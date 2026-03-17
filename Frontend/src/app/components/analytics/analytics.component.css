@@ -1,0 +1,385 @@
+/* ── Container ──────────────────────────────────────────────────────────────── */
+.analytics-overview {
+  padding: 24px;
+  background: var(--surface-ground);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────────── */
+.analytics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-color);
+}
+
+.page-subtitle {
+  font-size: 14px;
+  margin: 4px 0 0;
+  color: var(--text-color-secondary);
+}
+
+/* ── KPI Grid ───────────────────────────────────────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.kpi-card {
+  position: relative;
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  border-color: var(--primary-color);
+}
+
+.kpi-icon-bg {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.kpi-icon-bg.camera { background: rgba(16, 185, 129, 0.12); color: var(--green-500); }
+.kpi-icon-bg.model  { background: rgba(245, 158, 11,  0.12); color: var(--yellow-500); }
+
+.kpi-body { flex: 1; min-width: 0; }
+
+.kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-color-secondary);
+  margin: 0 0 6px;
+}
+
+.kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: var(--text-color);
+}
+
+.kpi-value.kpi-text {
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kpi-sub {
+  font-size: 12px;
+  color: var(--text-color-secondary);
+  margin: 0;
+}
+
+/* ── Analytics Row Layouts ───────────────────────────────────────────────────── */
+.analytics-row {
+  display: grid;
+  gap: 24px;
+  align-items: start;       /* cards don't stretch to equal height */
+}
+
+/* Row 1 — two equal columns on wide screens */
+.analytics-row.two-col {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Row 2 — single full-width column */
+.analytics-row.one-col {
+  grid-template-columns: 1fr;
+}
+
+/* Stack to single column on tablets/mobile */
+@media (max-width: 1024px) {
+  .analytics-row.two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Analytics Card ─────────────────────────────────────────────────────────── */
+.analytics-card {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+/* ── Card Header ────────────────────────────────────────────────────────────── */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.card-title {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-title i { color: var(--primary-color); font-size: 15px; }
+
+.card-subtitle {
+  font-size: 13px;
+  color: var(--text-color-secondary);
+  margin: 0;
+}
+
+.card-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ── Chart Type Toggle ──────────────────────────────────────────────────────── */
+.chart-type-toggle {
+  display: flex;
+  background: var(--surface-ground);
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-color-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.toggle-btn i { font-size: 12px; }
+.toggle-btn:hover { color: var(--text-color); }
+
+.toggle-btn.active {
+  background: var(--surface-card);
+  color: var(--primary-color);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Model Selectors ────────────────────────────────────────────────────────── */
+.model-selectors {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.selector-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 160px;
+}
+
+.selector-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-color-secondary);
+}
+
+.vs-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: #fff;
+  font-weight: 700;
+  font-size: 11px;
+  flex-shrink: 0;
+  margin-top: 20px;
+}
+
+.model-tag {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.model-tag.model-a { background: rgba(99, 102, 241, 0.15); color: #6366f1; }
+.model-tag.model-b { background: rgba(245, 158, 11,  0.15); color: #f59e0b; }
+
+/* ── Camera Selector ────────────────────────────────────────────────────────── */
+.camera-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+:host ::ng-deep .camera-multiselect { width: 100%; }
+
+.camera-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.camera-option i { color: var(--primary-color); }
+.cam-name     { font-size: 14px; font-weight: 500; color: var(--text-color); }
+.cam-location { font-size: 12px; color: var(--text-color-secondary); }
+
+/* ── Top-N Selector ─────────────────────────────────────────────────────────── */
+.topn-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topn-buttons { display: flex; gap: 4px; }
+
+.topn-btn {
+  width: 36px;
+  height: 32px;
+  border: 1px solid var(--surface-border);
+  border-radius: 6px;
+  background: var(--surface-card);
+  color: var(--text-color-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.topn-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
+
+.topn-btn.active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+}
+
+/* ── Chart Area ─────────────────────────────────────────────────────────────── */
+.chart-area {
+  width: 100%;
+  overflow-x: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+:host ::ng-deep .chart-area ngx-charts-bar-vertical,
+:host ::ng-deep .chart-area ngx-charts-bar-horizontal,
+:host ::ng-deep .chart-area ngx-charts-line-chart {
+  display: flex;
+  justify-content: center;
+}
+
+:host ::ng-deep .chart-area ngx-charts-pie-chart {
+  display: flex;
+  justify-content: center;
+}
+
+:host ::ng-deep .chart-area .ngx-charts-outer {
+  display: flex;
+  justify-content: center;
+}
+
+:host ::ng-deep .chart-area svg {
+  display: block;
+  margin: 0 auto;
+}
+
+/* ── Empty / Loading States ─────────────────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: var(--text-color-secondary);
+  gap: 12px;
+  text-align: center;
+}
+
+.empty-state i { font-size: 32px; opacity: 0.4; }
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 48px 24px;
+  color: var(--text-color-secondary);
+  font-size: 14px;
+}
+
+.small-loader {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--surface-border);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Responsive ─────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .analytics-overview { padding: 16px; }
+  .analytics-header    { flex-direction: column; align-items: flex-start; }
+  .kpi-grid            { grid-template-columns: 1fr; }
+  .card-header         { flex-direction: column; }
+  .model-selectors     { flex-direction: column; }
+  .vs-divider          { margin: 0 auto; }
+}

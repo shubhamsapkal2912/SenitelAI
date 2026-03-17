@@ -1,3 +1,5 @@
+<p-toast position="top-right"></p-toast>
+
 <div class="violation-report-container">
 
   <!-- ==================== PAGE HEADER ==================== -->
@@ -11,14 +13,9 @@
         pButton
         icon="pi pi-refresh"
         class="p-button-outlined p-button-secondary"
-        pTooltip="Refresh Data"
+        pTooltip="Refresh All"
         tooltipPosition="bottom"
-      ></button>
-      <button
-        pButton
-        icon="pi pi-filter"
-        label="Filter"
-        class="p-button-outlined p-button-secondary"
+        (click)="loadAllReports()"
       ></button>
     </div>
   </div>
@@ -28,91 +25,171 @@
 
     <div class="report-card" *ngFor="let section of reportSections">
 
-      <!-- Card Header -->
+      <!-- ── Card Header ── -->
       <div class="card-header">
         <div class="card-title-group">
           <span class="pi pi-chart-bar card-icon"></span>
           <h2 class="card-title">{{ section.label }}</h2>
         </div>
-        <button
-          pButton
-          icon="pi pi-download"
-          class="p-button-text p-button-sm export-btn"
-          pTooltip="Export Report"
-          tooltipPosition="left"
-          (click)="exportReport(section.period)"
-        ></button>
+        <div class="card-header-actions">
+          <button
+            pButton
+            icon="pi pi-refresh"
+            class="p-button-text p-button-sm action-btn"
+            pTooltip="Refresh"
+            tooltipPosition="left"
+            [disabled]="section.loading"
+            (click)="refreshSection(section)"
+          ></button>
+          <button
+            pButton
+            icon="pi pi-file-excel"
+            class="p-button-text p-button-sm action-btn export-btn"
+            pTooltip="Export to Excel"
+            tooltipPosition="left"
+            [loading]="section.exporting"
+            [disabled]="section.loading || section.error || section.totalCount === 0"
+            (click)="exportReport(section)"
+          ></button>
+        </div>
       </div>
 
-      <!-- Total Count -->
-      <div class="total-count-section">
-        <span class="total-count">{{ section.totalCount }}</span>
-        <div
-          class="trend-badge"
-          [ngClass]="{
-            'trend-up':      section.trendDirection === 'up',
-            'trend-down':    section.trendDirection === 'down',
-            'trend-neutral': section.trendDirection === 'neutral'
-          }"
-        >
-          <span
-            class="pi"
+      <!-- ── Loading Skeleton ── -->
+      <ng-container *ngIf="section.loading">
+        <div class="skeleton-body">
+          <p-skeleton height="3.5rem" styleClass="mb-2 skeleton-count"></p-skeleton>
+          <p-skeleton height="0.875rem" width="9rem" styleClass="mb-3 skeleton-label"></p-skeleton>
+
+          <div class="skeleton-divider"></div>
+
+          <div class="skeleton-section">
+            <p-skeleton height="0.7rem" width="7rem" styleClass="mb-3"></p-skeleton>
+            <ng-container *ngFor="let i of [1, 2, 3]">
+              <div class="skeleton-stat-row">
+                <p-skeleton height="0.875rem" width="6rem"></p-skeleton>
+                <p-skeleton height="0.875rem" width="2rem"></p-skeleton>
+              </div>
+              <p-skeleton height="0.375rem" styleClass="mb-3"></p-skeleton>
+            </ng-container>
+          </div>
+
+          <div class="skeleton-divider"></div>
+
+          <div class="skeleton-section">
+            <p-skeleton height="0.7rem" width="8rem" styleClass="mb-3"></p-skeleton>
+            <p-skeleton height="3rem" styleClass="mb-2 border-round-lg"></p-skeleton>
+            <p-skeleton height="3rem" styleClass="mb-2 border-round-lg"></p-skeleton>
+            <p-skeleton height="3rem" styleClass="mb-2 border-round-lg"></p-skeleton>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ── Error State ── -->
+      <ng-container *ngIf="!section.loading && section.error">
+        <div class="error-state">
+          <span class="pi pi-exclamation-circle error-icon"></span>
+          <p class="error-message">Failed to load data</p>
+          <button
+            pButton
+            label="Retry"
+            icon="pi pi-refresh"
+            class="p-button-outlined p-button-sm p-button-secondary"
+            (click)="refreshSection(section)"
+          ></button>
+        </div>
+      </ng-container>
+
+      <!-- ── Data State ── -->
+      <ng-container *ngIf="!section.loading && !section.error">
+
+        <!-- Total Count -->
+        <div class="total-count-section">
+          <span class="total-count">{{ section.totalCount }}</span>
+          <div
+            class="trend-badge"
             [ngClass]="{
-              'pi-arrow-up':   section.trendDirection === 'up',
-              'pi-arrow-down': section.trendDirection === 'down',
-              'pi-minus':      section.trendDirection === 'neutral'
+              'trend-up':      section.trendDirection === 'up',
+              'trend-down':    section.trendDirection === 'down',
+              'trend-neutral': section.trendDirection === 'neutral'
             }"
-          ></span>
-          <span class="trend-value">{{ section.trend }}%</span>
-        </div>
-      </div>
-      <p class="total-label">Total Violations</p>
-
-      <div class="card-divider"></div>
-
-      <!-- Breakdown by Type -->
-      <div class="breakdown-section">
-        <h3 class="section-label">Breakdown by Type</h3>
-        <div class="stat-item" *ngFor="let stat of section.stats">
-          <div class="stat-header">
-            <span class="stat-type" [ngClass]="getSeverityTextClass(stat.severity)">
-              {{ stat.type }}
-            </span>
-            <span class="stat-count">{{ stat.count }}</span>
+            [pTooltip]="getTrendTooltip(section)"
+            tooltipPosition="right"
+          >
+            <span
+              class="pi"
+              [ngClass]="{
+                'pi-arrow-up':   section.trendDirection === 'up',
+                'pi-arrow-down': section.trendDirection === 'down',
+                'pi-minus':      section.trendDirection === 'neutral'
+              }"
+            ></span>
+            <span class="trend-value">{{ section.trend }}%</span>
           </div>
-          <div class="progress-track">
-            <div
-              class="progress-fill"
-              [ngClass]="getProgressClass(stat.severity)"
-              [style.width.%]="stat.percentage"
-            ></div>
-          </div>
-          <span class="stat-percentage">{{ stat.percentage }}%</span>
         </div>
-      </div>
+        <p class="total-label">Total Violations</p>
 
-      <div class="card-divider"></div>
+        <div class="card-divider"></div>
 
-      <!-- Recent Violations -->
-      <div class="recent-section">
-        <h3 class="section-label">Recent Violations</h3>
-        <div class="violation-entry" *ngFor="let v of section.recentViolations">
-          <div class="entry-left">
-            <p-tag
-              [value]="v.type"
-              [severity]="getSeverityTag(v.severity)"
-              styleClass="entry-tag"
-            ></p-tag>
-            <div class="entry-info">
-              <span class="entry-plate">{{ v.licensePlate }}</span>
-              <span class="entry-camera">{{ v.cameraName }}</span>
+        <!-- Breakdown by Type -->
+        <div class="breakdown-section">
+          <h3 class="section-label">Breakdown by Type</h3>
+
+          <div class="empty-state" *ngIf="section.stats.length === 0">
+            <span class="pi pi-inbox empty-icon"></span>
+            <p class="empty-text">No violations recorded</p>
+          </div>
+
+          <div class="stat-item" *ngFor="let stat of section.stats">
+            <div class="stat-header">
+              <span class="stat-type" [ngClass]="getSeverityTextClass(stat.severity)">
+                {{ stat.type }}
+              </span>
+              <span class="stat-count">{{ stat.count }}</span>
             </div>
+            <div class="progress-track">
+              <div
+                class="progress-fill"
+                [ngClass]="getProgressClass(stat.severity)"
+                [style.width.%]="stat.percentage"
+              ></div>
+            </div>
+            <span class="stat-percentage">{{ stat.percentage }}%</span>
           </div>
-          <span class="entry-time">{{ v.timestamp }}</span>
         </div>
-      </div>
 
-      <!-- Card Footer -->
+        <div class="card-divider"></div>
+
+        <!-- Recent Violations -->
+        <div class="recent-section">
+          <h3 class="section-label">Recent Violations</h3>
+
+          <div class="empty-state" *ngIf="section.recentViolations.length === 0">
+            <span class="pi pi-check-circle empty-icon success-icon"></span>
+            <p class="empty-text">No recent violations</p>
+          </div>
+
+          <div
+            class="violation-entry"
+            *ngFor="let v of section.recentViolations"
+          >
+            <div class="entry-left">
+              <p-tag
+                [value]="v.type"
+                [severity]="getSeverityTag(v.severity)"
+                styleClass="entry-tag"
+              ></p-tag>
+              <div class="entry-info">
+                <span class="entry-plate">{{ v.licensePlate }}</span>
+                <span class="entry-camera">{{ v.cameraName }}</span>
+              </div>
+            </div>
+            <span class="entry-time">{{ v.timestamp }}</span>
+          </div>
+        </div>
+
+      </ng-container>
+
+      <!-- ── Card Footer (always visible) ── -->
       <div class="card-footer">
         <button
           pButton
@@ -120,6 +197,7 @@
           icon="pi pi-arrow-right"
           iconPos="right"
           class="p-button-text view-details-btn"
+          [disabled]="section.loading || section.error"
           (click)="viewDetails(section.period)"
         ></button>
       </div>

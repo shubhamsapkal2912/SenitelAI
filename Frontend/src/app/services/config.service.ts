@@ -40,4 +40,12 @@ export class ConfigService {
   delete(endpoint: string, options?: RequestOptions): Observable<any> {
     return this.http.delete(`${this.baseUrl}${endpoint}`, options);
   }
+
+  // Add this method to your existing ConfigService
+getBlob(path: string): Observable<Blob> {
+  return this.http.get(`${this.baseUrl}${path}`, {
+    responseType: 'blob',
+  });
+}
+
 }

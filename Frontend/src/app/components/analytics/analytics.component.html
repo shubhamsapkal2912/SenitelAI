@@ -1,0 +1,397 @@
+<p-toast></p-toast>
+
+<div class="analytics-overview">
+
+  <!-- ══════════════════════════ HEADER ══════════════════════════════════════ -->
+  <div class="analytics-header">
+    <div class="header-content">
+      <h1 class="page-title">Violation Analytics</h1>
+      <p class="page-subtitle">Detailed comparison and trend analysis</p>
+    </div>
+    <div class="header-filter">
+      <p-calendar
+        [(ngModel)]="selectedMonth"
+        view="month"
+        dateFormat="MM yy"
+        [yearNavigator]="true"
+        yearRange="2023:2030"
+        [maxDate]="maxDate"
+        (onSelect)="onMonthChange()"
+        [showIcon]="true"
+        styleClass="month-picker"
+        placeholder="Select Month">
+      </p-calendar>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════ SUMMARY KPIs ════════════════════════════════ -->
+  <div class="kpi-grid">
+
+    <div class="kpi-card">
+      <div class="kpi-icon-bg">
+        <i class="pi pi-exclamation-triangle"></i>
+      </div>
+      <div class="kpi-body">
+        <p class="kpi-label">Total Violations</p>
+        <h3 class="kpi-value">
+          <span *ngIf="loadingSummary"><i class="pi pi-spin pi-spinner"></i></span>
+          <span *ngIf="!loadingSummary">{{ totalViolations | number }}</span>
+        </h3>
+        <p class="kpi-sub">Selected month</p>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon-bg camera">
+        <i class="pi pi-map-marker"></i>
+      </div>
+      <div class="kpi-body">
+        <p class="kpi-label">Most Active Location</p>
+        <h3 class="kpi-value kpi-text">{{ mostActiveLocation }}</h3>
+        <p class="kpi-sub">Highest violation zone</p>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon-bg model">
+        <i class="pi pi-tag"></i>
+      </div>
+      <div class="kpi-body">
+        <p class="kpi-label">Top Violation Type</p>
+        <h3 class="kpi-value kpi-text">{{ topViolationType }}</h3>
+        <p class="kpi-sub">Most detected violation</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════ ROW 1 — MODEL + CAMERA ══════════════════════ -->
+  <div class="analytics-row two-col">
+
+    <!-- ── MODEL COMPARISON ─────────────────────────────────────────────── -->
+    <div class="analytics-card">
+
+      <div class="card-header">
+        <div class="card-title-group">
+          <h2 class="card-title">
+            <i class="pi pi-tag"></i>
+            Model-wise Comparison
+            <span *ngIf="loadingModels" class="small-loader"></span>
+          </h2>
+          <p class="card-subtitle">Compare violations detected by two ML models</p>
+        </div>
+        <div class="card-controls">
+          <div class="chart-type-toggle">
+            <button class="toggle-btn" [class.active]="modelChartType === 'bar'"
+                    (click)="modelChartType = 'bar'" pRipple>
+              <i class="pi pi-chart-bar"></i> Bar
+            </button>
+            <button class="toggle-btn" [class.active]="modelChartType === 'pie'"
+                    (click)="modelChartType = 'pie'" pRipple>
+              <i class="pi pi-chart-pie"></i> Pie
+            </button>
+            <button class="toggle-btn" [class.active]="modelChartType === 'line'"
+                    (click)="modelChartType = 'line'" pRipple>
+              <i class="pi pi-chart-line"></i> Line
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Model selectors -->
+      <div class="model-selectors">
+        <div class="selector-group">
+          <label class="selector-label">Model A</label>
+          <p-dropdown
+            [options]="availableModels"
+            [(ngModel)]="selectedModelA"
+            optionLabel="name"
+            placeholder="Select Model A"
+            styleClass="w-full"
+            (onChange)="onModelSelectionChange()">
+            <ng-template pTemplate="selectedItem">
+              <span class="model-tag model-a" *ngIf="selectedModelA">
+                {{ selectedModelA.name }}
+              </span>
+            </ng-template>
+          </p-dropdown>
+        </div>
+
+        <div class="vs-divider"><span>VS</span></div>
+
+        <div class="selector-group">
+          <label class="selector-label">Model B</label>
+          <p-dropdown
+            [options]="availableModels"
+            [(ngModel)]="selectedModelB"
+            optionLabel="name"
+            placeholder="Select Model B"
+            styleClass="w-full"
+            (onChange)="onModelSelectionChange()">
+            <ng-template pTemplate="selectedItem">
+              <span class="model-tag model-b" *ngIf="selectedModelB">
+                {{ selectedModelB.name }}
+              </span>
+            </ng-template>
+          </p-dropdown>
+        </div>
+      </div>
+
+      <!-- Chart area -->
+      <div class="chart-area" *ngIf="modelBarData.length && !loadingModels">
+
+        <ngx-charts-bar-vertical
+          *ngIf="modelChartType === 'bar'"
+          [view]="cardView"
+          [results]="modelBarData"
+          [scheme]="colorSchemeModel"
+          [xAxis]="true" [yAxis]="true"
+          [showXAxisLabel]="true" [showYAxisLabel]="true"
+          xAxisLabel="Model" yAxisLabel="Violations"
+          [yScaleMin]="0" [yScaleMax]="yMax(modelBarData)"
+          [yAxisTickFormatting]="yAxisTickFormatting"
+          [roundEdges]="true" [animations]="true">
+        </ngx-charts-bar-vertical>
+
+        <ngx-charts-pie-chart
+          *ngIf="modelChartType === 'pie'"
+          [view]="cardView"
+          [results]="modelBarData"
+          [scheme]="colorSchemeModel"
+          [legend]="true" [legendPosition]="legendPosition"
+          [labels]="true" [doughnut]="false" [animations]="true">
+        </ngx-charts-pie-chart>
+
+        <ngx-charts-line-chart
+          *ngIf="modelChartType === 'line' && modelLineData.length"
+          [view]="cardView"
+          [results]="modelLineData"
+          [scheme]="colorSchemeModel"
+          [xAxis]="true" [yAxis]="true"
+          [showXAxisLabel]="true" [showYAxisLabel]="true"
+          xAxisLabel="Day" yAxisLabel="Violations"
+          [yScaleMin]="0" [yScaleMax]="yMaxMulti(modelLineData)"
+          [yAxisTickFormatting]="yAxisTickFormatting"
+          [legend]="true" [animations]="true">
+        </ngx-charts-line-chart>
+
+      </div>
+
+      <div class="empty-state" *ngIf="!selectedModelA || !selectedModelB">
+        <i class="pi pi-info-circle"></i>
+        <p>Select both Model A and Model B to see the comparison.</p>
+      </div>
+
+      <div class="empty-state"
+           *ngIf="selectedModelA && selectedModelB && !modelBarData.length && !loadingModels">
+        <i class="pi pi-chart-bar"></i>
+        <p>No data available for the selected models this month.</p>
+      </div>
+
+      <div class="loading-state" *ngIf="loadingModels">
+        <i class="pi pi-spin pi-spinner"></i> Loading comparison…
+      </div>
+
+    </div>
+
+    <!-- ── CAMERA COMPARISON ─────────────────────────────────────────────── -->
+    <div class="analytics-card">
+
+      <div class="card-header">
+        <div class="card-title-group">
+          <h2 class="card-title">
+            <i class="pi pi-video"></i>
+            Camera-wise Comparison
+            <span *ngIf="loadingCameras" class="small-loader"></span>
+          </h2>
+          <p class="card-subtitle">Select one or more cameras to compare</p>
+        </div>
+        <div class="card-controls">
+          <div class="chart-type-toggle">
+            <button class="toggle-btn" [class.active]="cameraChartType === 'bar'"
+                    (click)="cameraChartType = 'bar'" pRipple>
+              <i class="pi pi-chart-bar"></i> Bar
+            </button>
+            <button class="toggle-btn" [class.active]="cameraChartType === 'pie'"
+                    (click)="cameraChartType = 'pie'" pRipple>
+              <i class="pi pi-chart-pie"></i> Pie
+            </button>
+            <button class="toggle-btn" [class.active]="cameraChartType === 'line'"
+                    (click)="cameraChartType = 'line'" pRipple>
+              <i class="pi pi-chart-line"></i> Line
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Camera multi-select -->
+      <div class="camera-selector">
+        <label class="selector-label">Select Cameras to Compare</label>
+        <p-multiSelect
+          [options]="availableCameras"
+          [(ngModel)]="selectedCameras"
+          optionLabel="name"
+          placeholder="Choose cameras…"
+          [filter]="true"
+          filterPlaceholder="Search camera…"
+          (onChange)="onCameraSelectionChange()"
+          [maxSelectedLabels]="4"
+          selectedItemsLabel="{0} cameras selected"
+          styleClass="camera-multiselect">
+
+          <ng-template let-cam pTemplate="item">
+            <div class="camera-option">
+              <i class="pi pi-video"></i>
+              <div>
+                <div class="cam-name">{{ cam.name }}</div>
+                <div class="cam-location" *ngIf="cam.location">{{ cam.location }}</div>
+              </div>
+            </div>
+          </ng-template>
+
+        </p-multiSelect>
+      </div>
+
+      <!-- Chart area -->
+      <div class="chart-area" *ngIf="cameraBarData.length && !loadingCameras">
+
+        <ngx-charts-bar-vertical
+          *ngIf="cameraChartType === 'bar'"
+          [view]="cardView"
+          [results]="cameraBarData"
+          [scheme]="colorScheme"
+          [xAxis]="true" [yAxis]="true"
+          [showXAxisLabel]="true" [showYAxisLabel]="true"
+          xAxisLabel="Camera" yAxisLabel="Violations"
+          [yScaleMin]="0" [yScaleMax]="yMax(cameraBarData)"
+          [yAxisTickFormatting]="yAxisTickFormatting"
+          [roundEdges]="true" [animations]="true">
+        </ngx-charts-bar-vertical>
+
+        <ngx-charts-pie-chart
+          *ngIf="cameraChartType === 'pie'"
+          [view]="cardView"
+          [results]="cameraBarData"
+          [scheme]="colorScheme"
+          [legend]="true" [legendPosition]="legendPosition"
+          [labels]="true" [animations]="true">
+        </ngx-charts-pie-chart>
+
+        <ngx-charts-line-chart
+          *ngIf="cameraChartType === 'line' && cameraLineData.length"
+          [view]="cardView"
+          [results]="cameraLineData"
+          [scheme]="colorScheme"
+          [xAxis]="true" [yAxis]="true"
+          [showXAxisLabel]="true" [showYAxisLabel]="true"
+          xAxisLabel="Day" yAxisLabel="Violations"
+          [yScaleMin]="0" [yScaleMax]="yMaxMulti(cameraLineData)"
+          [yAxisTickFormatting]="yAxisTickFormatting"
+          [legend]="true" [animations]="true">
+        </ngx-charts-line-chart>
+
+      </div>
+
+      <div class="empty-state" *ngIf="!selectedCameras.length">
+        <i class="pi pi-info-circle"></i>
+        <p>Select at least one camera to view its data.</p>
+      </div>
+
+      <div class="empty-state"
+           *ngIf="selectedCameras.length && !cameraBarData.length && !loadingCameras">
+        <i class="pi pi-video"></i>
+        <p>No data for selected cameras this month.</p>
+      </div>
+
+      <div class="loading-state" *ngIf="loadingCameras">
+        <i class="pi pi-spin pi-spinner"></i> Loading camera data…
+      </div>
+
+    </div>
+
+  </div>
+  <!-- ══ END ROW 1 ══════════════════════════════════════════════════════════ -->
+
+
+  <!-- ══════════════════════════ ROW 2 — LOCATION (full width) ══════════════ -->
+  <div class="analytics-row one-col">
+
+    <div class="analytics-card">
+
+      <div class="card-header">
+        <div class="card-title-group">
+          <h2 class="card-title">
+            <i class="pi pi-map-marker"></i>
+            Location-wise Comparison
+            <span *ngIf="loadingLocations" class="small-loader"></span>
+          </h2>
+          <p class="card-subtitle">Top violation hotspots for the selected month</p>
+        </div>
+
+        <div class="card-controls">
+          <div class="topn-selector">
+            <label class="selector-label">Show Top</label>
+            <div class="topn-buttons">
+              <button class="topn-btn" [class.active]="topN === 5"
+                      (click)="topN = 5; loadLocationAnalytics()">5</button>
+              <button class="topn-btn" [class.active]="topN === 10"
+                      (click)="topN = 10; loadLocationAnalytics()">10</button>
+              <button class="topn-btn" [class.active]="topN === 20"
+                      (click)="topN = 20; loadLocationAnalytics()">20</button>
+            </div>
+          </div>
+
+          <div class="chart-type-toggle">
+            <button class="toggle-btn" [class.active]="locationChartType === 'bar'"
+                    (click)="locationChartType = 'bar'" pRipple>
+              <i class="pi pi-chart-bar"></i> Bar
+            </button>
+            <button class="toggle-btn" [class.active]="locationChartType === 'pie'"
+                    (click)="locationChartType = 'pie'" pRipple>
+              <i class="pi pi-chart-pie"></i> Pie
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart area -->
+      <div class="chart-area" *ngIf="locationBarData.length && !loadingLocations">
+
+        <ngx-charts-bar-horizontal
+          *ngIf="locationChartType === 'bar'"
+          [view]="wideView"
+          [results]="locationBarData"
+          [scheme]="colorScheme"
+          [xAxis]="true" [yAxis]="true"
+          [showXAxisLabel]="true" [showYAxisLabel]="true"
+          xAxisLabel="Violations" yAxisLabel="Location"
+          [xScaleMax]="yMax(locationBarData)"
+          [roundEdges]="true" [animations]="true">
+        </ngx-charts-bar-horizontal>
+
+        <ngx-charts-pie-chart
+          *ngIf="locationChartType === 'pie'"
+          [view]="wideView"
+          [results]="locationBarData"
+          [scheme]="colorScheme"
+          [legend]="true" [legendPosition]="legendPosition"
+          [labels]="true" [animations]="true">
+        </ngx-charts-pie-chart>
+
+      </div>
+
+      <div class="empty-state" *ngIf="!locationBarData.length && !loadingLocations">
+        <i class="pi pi-map-marker"></i>
+        <p>No location data available for the selected month.</p>
+      </div>
+
+      <div class="loading-state" *ngIf="loadingLocations">
+        <i class="pi pi-spin pi-spinner"></i> Loading location data…
+      </div>
+
+    </div>
+
+  </div>
+  <!-- ══ END ROW 2 ══════════════════════════════════════════════════════════ -->
+
+</div>

@@ -30,6 +30,7 @@
       />
     </div>
   </div>
+
   <!-- ── Table ───────────────────────────────────────── -->
   <div class="vd-table-card">
     <p-table
@@ -39,38 +40,29 @@
       styleClass="p-datatable-sm"
       [rowHover]="true"
     >
-
-      <!-- Header -->
       <ng-template pTemplate="header">
         <tr>
           <th style="width:70px">#ID</th>
           <th style="width:140px">Snapshot</th>
           <th style="width:200px">Date &amp; Time</th>
           <th>Violation Type</th>
+          <th>Vehicle Number</th>
           <th style="width:120px">Camera</th>
           <th style="width:80px; text-align:center">View</th>
         </tr>
       </ng-template>
 
-      <!-- Body -->
       <ng-template pTemplate="body" let-v>
         <tr>
-
           <!-- ID -->
-          <td>
-            <span class="vd-id">#{{ v.id }}</span>
-          </td>
+          <td><span class="vd-id">#{{ v.id }}</span></td>
 
           <!-- Snapshot -->
           <td>
             <div class="vd-thumb" (click)="openPreview(v)">
               <ng-container *ngIf="v.frame_image; else noImg">
-                <img
-                  [src]="v.frame_image"
-                  alt="Violation snapshot"
-                  class="vd-thumb-img"
-                  (error)="onImageError($event)"
-                />
+                <img [src]="v.frame_image" alt="Violation snapshot"
+                     class="vd-thumb-img" (error)="onImageError($event)" />
               </ng-container>
               <ng-template #noImg>
                 <div class="vd-no-img">
@@ -95,37 +87,34 @@
 
           <!-- Violation Type -->
           <td>
-            <p-tag
-              [value]="v.violation_type"
-              [severity]="getViolationSeverity(v.violation_type)"
-              icon="pi pi-exclamation-triangle"
-              styleClass="vd-violation-tag"
-            />
+            <p-tag [value]="v.violation_type"
+                   [severity]="getViolationSeverity(v.violation_type)"
+                   icon="pi pi-exclamation-triangle" />
+          </td>
+
+          <!-- Plate -->
+          <td>
+            <span class="vd-camera">
+              <i class="pi pi-id-card"></i>
+              {{ v.plate_number || '—' }}
+            </span>
           </td>
 
           <!-- Camera -->
           <td>
             <span class="vd-camera">
               <i class="pi pi-video"></i>
-              Camera #{{ v.camera }}
+              Camera {{ v.camera }}
             </span>
           </td>
 
           <!-- View -->
           <td class="vd-center">
-            <p-button
-              icon="pi pi-eye"
-              severity="secondary"
-              [rounded]="true"
-              [text]="true"
-              size="small"
-              pTooltip="View snapshot"
-              tooltipPosition="left"
-              (onClick)="openPreview(v)"
-              [disabled]="!v.frame_image"
-            />
+            <p-button icon="pi pi-eye" severity="secondary"
+                      [rounded]="true" [text]="true" size="small"
+                      pTooltip="View snapshot" tooltipPosition="left"
+                      (onClick)="openPreview(v)" [disabled]="!v.frame_image" />
           </td>
-
         </tr>
       </ng-template>
 
@@ -144,13 +133,12 @@
       <!-- Empty state -->
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="6" class="vd-empty">
+          <td colspan="7" class="vd-empty">
             <i class="pi pi-inbox"></i>
             <p>No violations found</p>
           </td>
         </tr>
       </ng-template>
-
     </p-table>
 
     <!-- Paginator -->
@@ -158,51 +146,110 @@
       [first]="first"
       [rows]="rows"
       [totalRecords]="totalRecords"
-      
       (onPageChange)="onPageChange($event)"
       styleClass="vd-paginator"
     />
   </div>
-
 </div>
 
 
-<!-- ── Image Preview Dialog ────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  Image Preview Dialog (with Zoom + Pan)                       -->
+<!-- ══════════════════════════════════════════════════════════════ -->
 <p-dialog
   [(visible)]="previewVisible"
   [modal]="true"
   [draggable]="false"
   [resizable]="false"
-  [style]="{ width: '860px' }"
+  [style]="{ width: '880px' }"
   header="Violation Snapshot"
   styleClass="vd-dialog"
   (onHide)="closePreview()"
 >
   <div class="vd-preview" *ngIf="selectedViolation">
 
-    <!-- Full image -->
-    <div class="vd-preview-img-wrap">
+    <!-- ── Zoomable image area ──────────────────────────────── -->
+    <div
+      #imgWrapRef
+      class="vd-preview-img-wrap"
+      [class.vd-is-dragging]="isDragging"
+      [class.vd-is-zoomed]="zoomLevel > 1"
+      (mousedown)="onMouseDown($event)"
+      (mousemove)="onMouseMove($event)"
+      (mouseup)="onMouseUp()"
+      (mouseleave)="onMouseUp()"
+    >
+      <!-- Actual image -->
       <ng-container *ngIf="selectedViolation.frame_image; else noPreviewImg">
         <img
           [src]="previewImage"
           alt="Violation snapshot"
           class="vd-preview-img"
+          [style.transform]="imageTransform"
           (error)="onImageError($event)"
+          draggable="false"
         />
       </ng-container>
+
       <ng-template #noPreviewImg>
         <div class="vd-no-preview">
           <i class="pi pi-image"></i>
           <p>No snapshot available for this violation</p>
         </div>
       </ng-template>
+
+      <!-- ── Floating zoom toolbar ─────────────────────────── -->
+      <div class="vd-zoom-bar" *ngIf="selectedViolation.frame_image">
+
+        <button
+          class="vd-zoom-btn"
+          (click)="zoomOut()"
+          [disabled]="zoomLevel <= minZoom"
+          pTooltip="Zoom Out  (scroll ↓)"
+          tooltipPosition="top"
+          aria-label="Zoom out"
+        >
+          <i class="pi pi-minus"></i>
+        </button>
+
+        <span class="vd-zoom-pct">{{ zoomPercent }}</span>
+
+        <button
+          class="vd-zoom-btn"
+          (click)="zoomIn()"
+          [disabled]="zoomLevel >= maxZoom"
+          pTooltip="Zoom In  (scroll ↑)"
+          tooltipPosition="top"
+          aria-label="Zoom in"
+        >
+          <i class="pi pi-plus"></i>
+        </button>
+
+        <!-- Divider + Reset -->
+        <span class="vd-zoom-divider"></span>
+
+        <button
+          class="vd-zoom-btn vd-zoom-reset-btn"
+          (click)="resetZoom()"
+          pTooltip="Reset zoom"
+          tooltipPosition="top"
+          aria-label="Reset zoom"
+        >
+          <i class="pi pi-arrows-alt"></i>
+        </button>
+      </div>
+
+      <!-- ── Drag hint badge (shown only when zoomed in) ──── -->
+      <div class="vd-drag-hint" *ngIf="zoomLevel > 1 && !isDragging">
+        <i class="pi pi-arrows-h"></i> Drag to pan
+      </div>
     </div>
 
-    <!-- Meta grid -->
+    <!-- ── Meta grid ──────────────────────────────────────── -->
     <div class="vd-preview-meta">
       <div class="vd-meta-item">
         <span class="vd-meta-label"><i class="pi pi-hashtag"></i> Violation ID</span>
-        <span class="vd-meta-value">#{{ selectedViolation.id }}</span>
+        <span class="vd-meta-value">{{ selectedViolation.id }}</span>
       </div>
       <div class="vd-meta-item">
         <span class="vd-meta-label"><i class="pi pi-clock"></i> Timestamp</span>
@@ -211,28 +258,26 @@
       <div class="vd-meta-item">
         <span class="vd-meta-label"><i class="pi pi-exclamation-triangle"></i> Violation Type</span>
         <span class="vd-meta-value">
-          <p-tag
-            [value]="selectedViolation.violation_type"
-            [severity]="getViolationSeverity(selectedViolation.violation_type)"
-          />
+          <p-tag [value]="selectedViolation.violation_type"
+                 [severity]="getViolationSeverity(selectedViolation.violation_type)" />
         </span>
       </div>
       <div class="vd-meta-item">
         <span class="vd-meta-label"><i class="pi pi-cog"></i> ML Model</span>
-        <span class="vd-meta-value">Model #{{ selectedViolation.ml_model }}</span>
+        <span class="vd-meta-value">Model {{ selectedViolation.ml_model }}</span>
       </div>
       <div class="vd-meta-item">
         <span class="vd-meta-label"><i class="pi pi-video"></i> Camera</span>
-        <span class="vd-meta-value">Camera #{{ selectedViolation.camera }}</span>
+        <span class="vd-meta-value">Camera {{ selectedViolation.camera }}</span>
       </div>
       <div class="vd-meta-item">
         <span class="vd-meta-label"><i class="pi pi-sitemap"></i> Pipeline</span>
-        <span class="vd-meta-value">Pipeline #{{ selectedViolation.pipeline }}</span>
+        <span class="vd-meta-value">Pipeline {{ selectedViolation.pipeline }}</span>
       </div>
     </div>
 
-    <!-- Detection breakdown -->
-    <div class="vd-det-list">
+    <!-- ── Detection breakdown ────────────────────────────── -->
+    <!-- <div class="vd-det-list">
       <h4>
         <i class="pi pi-list"></i>
         All Detections
@@ -241,30 +286,19 @@
 
       <div *ngIf="selectedViolation.detections.length > 0; else noDetList">
         <div class="vd-det-scroll">
-          <div
-            class="vd-det-row"
-            *ngFor="let det of selectedViolation.detections; let i = index"
-          >
+          <div class="vd-det-row"
+               *ngFor="let det of selectedViolation.detections; let i = index">
             <span class="vd-det-idx">{{ i + 1 }}</span>
-
-            <p-tag
-              [value]="det.label"
-              [severity]="getConfidenceSeverity(det.confidence)"
-            />
-
+            <p-tag [value]="det.label" [severity]="getConfidenceSeverity(det.confidence)" />
             <span class="vd-det-conf">{{ formatConfidence(det.confidence) }}</span>
-
             <div class="vd-det-bbox-wrap">
               <span class="vd-det-bbox-label">BBox:</span>
               <span class="vd-det-bbox">
                 x1:{{ det.bbox.x1 }} y1:{{ det.bbox.y1 }}
                 x2:{{ det.bbox.x2 }} y2:{{ det.bbox.y2 }}
               </span>
-              <span class="vd-det-bbox">
-                {{ det.bbox.width }}×{{ det.bbox.height }}px
-              </span>
+              <span class="vd-det-bbox">{{ det.bbox.width }}×{{ det.bbox.height }}px</span>
             </div>
-
           </div>
         </div>
       </div>
@@ -275,8 +309,7 @@
           No detection data recorded for this violation
         </div>
       </ng-template>
-
-    </div>
+    </div> -->
 
   </div>
 </p-dialog>

@@ -76,20 +76,27 @@ export class DashboardComponent implements OnInit {
       icon: 'th-large',
       label: 'Dashboard',
       routerLink: '/dashboard/overview'
+    }
+    ,
+    {
+      id: 'analytics',
+      icon: 'chart-line',
+      label: 'Analytics',
+      routerLink: '/dashboard/analytics'
     },
     {
       id: 'live-feed',
       icon: 'video',
       label: 'Live Feed',
       routerLink: '/dashboard/live-feed',
-      badge: 3
+     
     },
     {
       id: 'violations',
       icon: 'exclamation-triangle',
       label: 'Violations Report',
       routerLink: '/dashboard/violation-report',
-      badge: 12
+      
     },
     {
       id: 'violation-detail',
@@ -108,18 +115,6 @@ export class DashboardComponent implements OnInit {
       icon: 'wrench',
       label: 'Pipeline Management',
       routerLink: '/dashboard/pipeline-management'
-    },
-    {
-      id: 'analytics',
-      icon: 'chart-line',
-      label: 'Analytics',
-      routerLink: '/dashboard/analytics'
-    },
-    {
-      id: 'settings',
-      icon: 'cog',
-      label: 'Settings',
-      routerLink: '/dashboard/settings'
     }
   ];
 

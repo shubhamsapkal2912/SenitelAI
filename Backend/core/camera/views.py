@@ -28,6 +28,10 @@ class CameraDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CameraSerializer
     permission_classes = [IsAuthenticated]
 
+class AllCameraAPIView(generics.ListAPIView):
+    serializer_class = CameraSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Camera.objects.all()
 
 class ActiveCameraAPIView(generics.ListAPIView):
     serializer_class = CameraSerializer

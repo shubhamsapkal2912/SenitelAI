@@ -47,6 +47,11 @@ export const routes: Routes = [
         loadComponent: () => import('./components/violation-detail/violation-detail.component').then(m => m.ViolationDetailComponent),
         title: 'Violation Detail'
       },
+      {
+        path: 'analytics',
+        loadComponent: () => import('./components/analytics/analytics.component').then(m => m.AnalyticsComponent),
+        title: 'Analytics'
+      },
       // Default child route
       { path: '', redirectTo: 'overview', pathMatch: 'full' }
     ]

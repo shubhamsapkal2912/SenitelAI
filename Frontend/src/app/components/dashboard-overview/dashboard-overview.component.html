@@ -6,17 +6,20 @@
       <h1 class="dashboard-title">Dashboard Overview</h1>
       <p class="dashboard-subtitle">Real-time violation detection and analytics</p>
     </div>
+
     <div class="header-actions">
       <div class="search-wrapper p-input-icon-left">
         <i class="pi pi-search"></i>
         <input pInputText type="text" placeholder="Search vehicle, location..." class="search-input" />
       </div>
+
       <button class="notification-btn" pRipple>
         <i class="pi pi-bell"></i>
         <span class="notification-badge"></span>
       </button>
     </div>
   </div>
+
 
   <!-- KPI Cards Grid -->
   <div class="kpi-grid">
@@ -26,141 +29,197 @@
       <div class="kpi-icon-bg">
         <i class="pi pi-exclamation-triangle"></i>
       </div>
+
       <div class="kpi-header">
         <div class="kpi-info">
           <p class="kpi-label">Total Violations</p>
           <h3 class="kpi-value">{{ totalViolations | number }}</h3>
         </div>
-        <span class="kpi-trend trend-up"><i class="pi pi-arrow-up"></i> +12%</span>
+
+        <span class="kpi-trend trend-up">
+          <i class="pi pi-arrow-up"></i> +12%
+        </span>
       </div>
+
       <div class="kpi-progress">
-        <div class="progress-bar" style="width: 75%; background: var(--primary-color);"></div>
+        <div class="progress-bar"
+             style="width: 75%; background: var(--primary-color);"></div>
       </div>
+
       <p class="kpi-footer">vs. yesterday</p>
     </div>
+
 
     <!-- Helmet Missing -->
     <div class="kpi-card">
       <div class="kpi-icon-bg helmet">
         <i class="pi pi-user"></i>
       </div>
+
       <div class="kpi-header">
         <div class="kpi-info">
           <p class="kpi-label">Helmet Missing</p>
           <h3 class="kpi-value">{{ helmetMissingCount | number }}</h3>
         </div>
-        <span class="kpi-trend trend-down"><i class="pi pi-arrow-down"></i> -5%</span>
+
+        <span class="kpi-trend trend-down">
+          <i class="pi pi-arrow-down"></i> -5%
+        </span>
       </div>
+
       <div class="kpi-progress">
-        <div class="progress-bar" style="width: 45%; background: var(--indigo-500);"></div>
+        <div class="progress-bar"
+             style="width: 45%; background: var(--indigo-500);"></div>
       </div>
+
       <p class="kpi-footer">vs. yesterday</p>
     </div>
+
 
     <!-- Signal Jump -->
     <div class="kpi-card">
       <div class="kpi-icon-bg signal">
         <i class="pi pi-stop-circle"></i>
       </div>
+
       <div class="kpi-header">
         <div class="kpi-info">
           <p class="kpi-label">Signal Jump</p>
           <h3 class="kpi-value">{{ signalJumpCount | number }}</h3>
         </div>
-        <span class="kpi-trend trend-up"><i class="pi pi-arrow-up"></i> +22%</span>
+
+        <span class="kpi-trend trend-up">
+          <i class="pi pi-arrow-up"></i> +22%
+        </span>
       </div>
+
       <div class="kpi-progress">
-        <div class="progress-bar" style="width: 60%; background: var(--orange-500);"></div>
+        <div class="progress-bar"
+             style="width: 60%; background: var(--orange-500);"></div>
       </div>
+
       <p class="kpi-footer">vs. yesterday</p>
     </div>
+
 
     <!-- System Health -->
     <div class="kpi-card">
       <div class="kpi-icon-bg health">
         <i class="pi pi-video"></i>
       </div>
+
       <div class="kpi-header">
         <div class="kpi-info">
           <p class="kpi-label">System Health</p>
           <h3 class="kpi-value">{{ systemHealthPercent }}%</h3>
         </div>
+
         <span class="kpi-trend trend-online">
           <i class="pi pi-check-circle"></i> Online
         </span>
       </div>
+
       <div class="kpi-progress">
-        <div class="progress-bar" [style.width.%]="systemHealthPercent"
+        <div class="progress-bar"
+             [style.width.%]="systemHealthPercent"
              style="background: var(--green-500);"></div>
       </div>
-      <p class="kpi-footer">{{ activeCameras }}/{{ totalCameras }} Cameras Active</p>
+
+      <p class="kpi-footer">
+        {{ activeCameras }}/{{ totalCameras }} Cameras Active
+      </p>
     </div>
 
   </div>
+
+
 
   <!-- Main Content Grid -->
   <div class="content-grid">
 
     <!-- Chart Section -->
     <div class="chart-section">
+
       <div class="section-header">
+
         <div class="header-info">
           <h2 class="section-title">
             Violation Trends {{ currentMonth }}
             <span *ngIf="loadingTrends" class="small-loader"></span>
           </h2>
-          <p class="section-subtitle">Daily violations for current month</p>
+
+          <p class="section-subtitle">
+            Daily violations for selected month
+          </p>
         </div>
+
+
+        <!-- ✅ Month Calendar Selector -->
         <div class="time-selector">
-          <button class="time-btn"
-            [class.active]="selectedTimeRange === 'weekly'"
-            (click)="selectedTimeRange = 'weekly'">Monthly</button>
+
+          <p-calendar
+  [(ngModel)]="selectedMonth"
+  view="month"
+  dateFormat="MM yy"
+  [yearNavigator]="true"
+  yearRange="2023:2030"
+  [maxDate]="maxDate"
+  (onSelect)="onMonthChange()"
+  [showIcon]="true"
+  styleClass="month-picker">
+</p-calendar>
+
         </div>
+
       </div>
 
-      <!-- ✅ ngx-charts Line Chart (single clean block) -->
+
+
+      <!-- Chart Container -->
       <div class="chart-container">
 
         <ngx-charts-line-chart
-  *ngIf="lineChartData.length > 0"
-  [view]="view"
-  [results]="lineChartData"
-  [scheme]="colorScheme"
-  [gradient]="false"
-  [xAxis]="true"
-  [yAxis]="true"
-  [showXAxisLabel]="true"
-  [showYAxisLabel]="true"
-  xAxisLabel="Days"
-  yAxisLabel="Violations"
-  [yScaleMin]="0"
-  [yScaleMax]="yScaleMax"
-  [yAxisTickFormatting]="yAxisTickFormatting"
-  [legend]="false"
-  [timeline]="false"
-  [animations]="true"
-  [autoScale]="false"
->
-</ngx-charts-line-chart>
+          *ngIf="lineChartData.length > 0"
+          [view]="view"
+          [results]="lineChartData"
+          [scheme]="colorScheme"
+          [gradient]="false"
+          [xAxis]="true"
+          [yAxis]="true"
+          [showXAxisLabel]="true"
+          [showYAxisLabel]="true"
+          xAxisLabel="Days"
+          yAxisLabel="Violations"
+          [yScaleMin]="0"
+          [yScaleMax]="yScaleMax"
+          [yAxisTickFormatting]="yAxisTickFormatting"
+          [legend]="false"
+          [timeline]="false"
+          [animations]="true"
+          [autoScale]="false">
+        </ngx-charts-line-chart>
 
 
-       
-
-        <!-- Loading State -->
+        <!-- Loading -->
         <div *ngIf="loadingTrends" class="no-data-label">
-          <i class="pi pi-spin pi-spinner"></i> Loading trends...
+          <i class="pi pi-spin pi-spinner"></i>
+          Loading trends...
         </div>
 
-        <!-- Empty State -->
+        <!-- Empty -->
         <div *ngIf="!lineChartData.length && !loadingTrends" class="no-data-label">
           No trend data available for this month
         </div>
 
       </div>
+
     </div>
+
+
 
     <!-- Live Alerts Section -->
     <div class="alerts-section">
+
       <div class="alerts-header">
         <h2 class="alerts-title">
           <span class="live-indicator">
@@ -169,41 +228,62 @@
           </span>
           Live Detections
         </h2>
+
         <button class="view-all-btn">View All</button>
       </div>
 
+
       <div class="alerts-list">
+
         <div class="alert-item" *ngFor="let alert of liveAlerts">
+
           <div class="alert-image-wrapper">
             <img [src]="alert.image" [alt]="alert.title" class="alert-image" />
             <div class="alert-overlay" [class]="'overlay-' + alert.severity"></div>
           </div>
+
           <div class="alert-content">
+
             <div class="alert-header">
               <h4 class="alert-title">{{ alert.title }}</h4>
               <span class="alert-time">{{ alert.time }}</span>
             </div>
+
             <p class="alert-location">
-              <i class="pi pi-map-marker"></i> {{ alert.location }}
+              <i class="pi pi-map-marker"></i>
+              {{ alert.location }}
             </p>
+
             <div class="alert-badges">
-              <span class="alert-badge" [class]="'badge-' + alert.severity">
+
+              <span class="alert-badge"
+                    [class]="'badge-' + alert.severity">
                 {{ alert.severityLabel }}
               </span>
-              <span class="alert-badge badge-camera">{{ alert.camera }}</span>
+
+              <span class="alert-badge badge-camera">
+                {{ alert.camera }}
+              </span>
+
             </div>
+
           </div>
+
         </div>
+
       </div>
+
 
       <div class="alerts-footer">
         <p-button
           label="Export Incident Report"
           [outlined]="true"
-          styleClass="w-full export-btn"
-        ></p-button>
+          styleClass="w-full export-btn">
+        </p-button>
       </div>
+
     </div>
 
   </div>
+
 </div>

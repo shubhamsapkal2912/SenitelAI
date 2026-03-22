@@ -14,7 +14,12 @@ export interface CameraListResponse {
   previous: string | null;
   results: Camera[];
 }
-
+export interface CameraDetailResponse {
+  total_cameras: number;
+  active_cameras: number;
+  inactive_cameras: number;
+  maintenance_cameras: number;
+}
 export interface CameraCreatePayload {
   name: string;
   rtsp_url: string;

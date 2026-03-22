@@ -8,7 +8,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 django.setup()
 
 import logging
-from engine.manager import WorkerManager          # ✅ renamed
+from engine.manager import WorkerManager          
 
 logging.basicConfig(level=logging.INFO)
 

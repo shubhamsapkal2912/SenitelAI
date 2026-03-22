@@ -32,7 +32,7 @@ class PlateRecognitionPipeline:
             logger.info("[PlatePipeline] No plate detected")
             return None
 
-        # 🔍 Save the raw plate crop for debugging
+        # Save the raw plate crop for debugging
         raw_debug_path = "/tmp/plate_crop.jpg"
         cv2.imwrite(raw_debug_path, plate_crop)
         logger.info(f"[PlatePipeline] Saved raw plate crop: {raw_debug_path}")

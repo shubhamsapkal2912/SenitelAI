@@ -20,7 +20,7 @@ interface CameraFeed {
   location: string;
   fps:      number;
   isLive:   boolean;
-  frame$?:  Observable<string>;   // ✅ live WebSocket stream
+  frame$?:  Observable<string>;   
 }
 
 interface Violation {
@@ -103,7 +103,6 @@ cameraFeeds: CameraFeed[] = [
   constructor(private streamService: CameraStreamService) {}
 
   ngOnInit(): void {
-    // ✅ Connect each camera to its live WebSocket stream
     this.cameraFeeds.forEach(cam => {
       cam.frame$ = this.streamService.connectCamera(cam.dbId);
     });

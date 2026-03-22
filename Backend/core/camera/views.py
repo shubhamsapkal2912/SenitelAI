@@ -39,3 +39,18 @@ class ActiveCameraAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         return Camera.objects.filter(status="active")
+
+class TotalCameraStatusAPIView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        total_cameras = Camera.objects.count()
+        active_cameras = Camera.objects.filter(status="active").count()
+        inactive_cameras = Camera.objects.filter(status="inactive").count()
+
+        data = {
+            "total_cameras": total_cameras,
+            "active_cameras": active_cameras,
+            "inactive_cameras": inactive_cameras,
+        }
+        return Response(data)    

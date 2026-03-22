@@ -8,20 +8,32 @@
       <h1 class="page-title">Violation Analytics</h1>
       <p class="page-subtitle">Detailed comparison and trend analysis</p>
     </div>
-    <div class="header-filter">
-      <p-calendar
-        [(ngModel)]="selectedMonth"
-        view="month"
-        dateFormat="MM yy"
-        [yearNavigator]="true"
-        yearRange="2023:2030"
-        [maxDate]="maxDate"
-        (onSelect)="onMonthChange()"
-        [showIcon]="true"
-        styleClass="month-picker"
-        placeholder="Select Month">
-      </p-calendar>
-    </div>
+<div class="header-filter">
+  <p-calendar
+    [(ngModel)]="selectedMonth"
+    view="month"
+    dateFormat="MM yy"
+    [yearNavigator]="true"
+    yearRange="2023:2030"
+    [maxDate]="maxDate"
+    (onSelect)="onMonthChange()"
+    [showIcon]="true"
+    styleClass="month-picker"
+    placeholder="Select Month">
+  </p-calendar>
+
+  <!--  Download button -->
+  <button
+    class="dl-trigger-btn"
+    (click)="openDownloadDialog()"
+    pRipple
+    pTooltip="Download chart as PNG"
+    tooltipPosition="bottom">
+    <i class="pi pi-download"></i>
+    <span>Download</span>
+  </button>
+</div>
+
   </div>
 
   <!-- ══════════════════════════ SUMMARY KPIs ════════════════════════════════ -->
@@ -394,4 +406,139 @@
   </div>
   <!-- ══ END ROW 2 ══════════════════════════════════════════════════════════ -->
 
+<!-- ══════════════════════════ DOWNLOAD DIALOG ════════════════════════════ -->
+<p-dialog
+  header="Download Analytics Report"
+  [(visible)]="showDownloadDialog"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="dl-dialog"
+  [style]="{ width: '680px', maxWidth: '95vw' }">
+
+  <!-- ── 1. Section selector ──────────────────────────────────────────── -->
+  <div class="dl-row">
+    <span class="dl-label">Data Section</span>
+    <div class="dl-toggle-group">
+      <button class="toggle-btn"
+              [class.active]="downloadSection === 'model'"
+              (click)="onDownloadSectionChange('model')" pRipple>
+        <i class="pi pi-tag"></i> Model Comparison
+      </button>
+      <button class="toggle-btn"
+              [class.active]="downloadSection === 'camera'"
+              (click)="onDownloadSectionChange('camera')" pRipple>
+        <i class="pi pi-video"></i> Camera Comparison
+      </button>
+      <button class="toggle-btn"
+              [class.active]="downloadSection === 'location'"
+              (click)="onDownloadSectionChange('location')" pRipple>
+        <i class="pi pi-map-marker"></i> Location Hotspots
+      </button>
+    </div>
+  </div>
+
+  <!-- ── 2. Chart type selector ───────────────────────────────────────── -->
+  <div class="dl-row">
+    <span class="dl-label">Chart Type</span>
+    <div class="dl-toggle-group">
+      <button *ngFor="let t of availableChartTypes"
+              class="toggle-btn"
+              [class.active]="downloadChartType === t.value"
+              (click)="setDownloadChartType(t.value)" pRipple>
+        <i [class]="t.icon"></i> {{ t.label }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ── 3. Chart preview ──────────────────────────────────────────────── -->
+  <div class="dl-row">
+    <span class="dl-label">
+      Preview · {{ downloadSectionLabel }} · {{ selectedMonth | date:'MMMM yyyy' }}
+    </span>
+
+    <div class="dl-preview-box">
+
+      <!-- Bar (non-location) -->
+      <ngx-charts-bar-vertical
+        *ngIf="downloadChartType === 'bar' && downloadSection !== 'location' && downloadBarData.length"
+        [view]="downloadPreviewView"
+        [results]="downloadBarData"
+        [scheme]="downloadColorScheme"
+        [xAxis]="true" [yAxis]="true"
+        [showXAxisLabel]="true" [showYAxisLabel]="true"
+        xAxisLabel="Category" yAxisLabel="Violations"
+        [yScaleMin]="0" [yScaleMax]="downloadYMax"
+        [yAxisTickFormatting]="yAxisTickFormatting"
+        [roundEdges]="true" [animations]="false">
+      </ngx-charts-bar-vertical>
+
+      <!-- Bar horizontal (location) -->
+      <ngx-charts-bar-horizontal
+        *ngIf="downloadChartType === 'bar' && downloadSection === 'location' && downloadBarData.length"
+        [view]="downloadPreviewView"
+        [results]="downloadBarData"
+        [scheme]="downloadColorScheme"
+        [xAxis]="true" [yAxis]="true"
+        [showXAxisLabel]="true" [showYAxisLabel]="true"
+        xAxisLabel="Violations" yAxisLabel="Location"
+        [xScaleMax]="downloadYMax"
+        [roundEdges]="true" [animations]="false">
+      </ngx-charts-bar-horizontal>
+
+      <!-- Pie -->
+      <ngx-charts-pie-chart
+        *ngIf="downloadChartType === 'pie' && downloadBarData.length"
+        [view]="downloadPreviewView"
+        [results]="downloadBarData"
+        [scheme]="downloadColorScheme"
+        [legend]="true" [legendPosition]="legendPosition"
+        [labels]="true" [animations]="false">
+      </ngx-charts-pie-chart>
+
+      <!-- Line -->
+      <ngx-charts-line-chart
+        *ngIf="downloadChartType === 'line' && downloadLineData.length"
+        [view]="downloadPreviewView"
+        [results]="downloadLineData"
+        [scheme]="downloadColorScheme"
+        [xAxis]="true" [yAxis]="true"
+        [showXAxisLabel]="true" [showYAxisLabel]="true"
+        xAxisLabel="Day" yAxisLabel="Violations"
+        [yScaleMin]="0" [yScaleMax]="downloadYMaxMulti"
+        [yAxisTickFormatting]="yAxisTickFormatting"
+        [legend]="true" [animations]="false">
+      </ngx-charts-line-chart>
+
+      <!-- Empty state -->
+      <div class="dl-empty"
+           *ngIf="!downloadBarData.length || (downloadChartType === 'line' && !downloadLineData.length)">
+        <i class="pi pi-chart-bar"></i>
+        <p>No data available for this section and month.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Footer ───────────────────────────────────────────────────────── -->
+  <ng-template pTemplate="footer">
+    <div class="dl-footer">
+      <button class="toggle-btn dl-cancel"
+              (click)="showDownloadDialog = false" pRipple>
+        <i class="pi pi-times"></i> Cancel
+      </button>
+      <button class="dl-download-btn"
+              (click)="downloadPng()"
+              [disabled]="isDownloading || !downloadBarData.length"
+              pRipple>
+        <i [class]="isDownloading ? 'pi pi-spin pi-spinner' : 'pi pi-download'"></i>
+        {{ isDownloading ? 'Exporting…' : 'Download PNG' }}
+      </button>
+    </div>
+  </ng-template>
+
+</p-dialog>
+
 </div>
+

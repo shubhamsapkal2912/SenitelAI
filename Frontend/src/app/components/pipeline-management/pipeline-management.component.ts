@@ -24,7 +24,7 @@ export interface Pipeline {
   camera_name: string;
   ml_model: number;
   model_name: string;
-  is_active: boolean;           // ✅ replaced status string
+  is_active: boolean;          
   queue_name: string;
   created_at: string;
 }
@@ -154,7 +154,7 @@ export class PipelineManagementComponent implements OnInit {
             p.camera_name.toLowerCase().includes(q) ||
             p.model_name.toLowerCase().includes(q) ||
             p.queue_name.toLowerCase().includes(q) ||
-            this.getStatusLabel(p.is_active).toLowerCase().includes(q)  // ✅
+            this.getStatusLabel(p.is_active).toLowerCase().includes(q)  
         )
       : [...this.allPipelines];
 
@@ -331,19 +331,19 @@ export class PipelineManagementComponent implements OnInit {
   }
 
   canStart(pipeline: Pipeline): boolean {
-    return !pipeline.is_active;           // ✅ simply not active
+    return !pipeline.is_active;          
   }
 
   canStop(pipeline: Pipeline): boolean {
-    return pipeline.is_active;            // ✅ simply active
+    return pipeline.is_active;            
   }
 
   getStatusSeverity(isActive: boolean): 'success' | 'danger' {
-    return isActive ? 'success' : 'danger';   // ✅ two states only
+    return isActive ? 'success' : 'danger';   
   }
 
   getStatusLabel(isActive: boolean): string {
-    return isActive ? 'Active' : 'Inactive';  // ✅ two states only
+    return isActive ? 'Active' : 'Inactive';  
   }
 
   getRelativeTime(dateString: string): string {
@@ -358,7 +358,7 @@ export class PipelineManagementComponent implements OnInit {
   }
 
   private updateMetrics(): void {
-    const active = this.allPipelines.filter((p) => p.is_active).length;   // ✅
+    const active = this.allPipelines.filter((p) => p.is_active).length;   
     this.metrics = {
       total:    this.allPipelines.length,
       active:   active,

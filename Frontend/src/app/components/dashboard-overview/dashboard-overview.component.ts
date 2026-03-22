@@ -9,6 +9,7 @@ import { ConfigService } from '../../services/config.service';
 import { MessageService } from 'primeng/api';
 import { CalendarModule } from 'primeng/calendar';
 import { FormsModule } from '@angular/forms';
+import { CameraDetailResponse } from '../../helpers/model/models';
 interface MLModelAnalytics {
   id: number;
   name: string;
@@ -39,7 +40,7 @@ interface LiveAlert {
     TooltipModule,
     RippleModule,
     InputTextModule,
-    NgxChartsModule,   // ✅ ngx-charts
+    NgxChartsModule,   
     CalendarModule,
     FormsModule
   ],
@@ -54,7 +55,7 @@ export class DashboardOverviewComponent implements OnInit {
   totalViolations: number = 0;
   helmetMissingCount: number = 0;
   signalJumpCount: number = 0;
-  systemHealthPercent: number = 98;
+  
   totalCameras: number = 42;
   activeCameras: number = 41;
   selectedMonth: Date = new Date();
@@ -70,15 +71,14 @@ yAxisTickFormatting = (value: number) => {
 
   currentMonth: string = '';
 
-  // ✅ CORRECT ngx-charts multi-series format
-  // Structure: [{ name: 'Series Label', series: [{ name: 'Day 1', value: 45 }, ...] }]
+ 
   lineChartData: any[] = [];
 
-  // ✅ colorScheme must be a string OR object with domain array
+ 
   colorScheme: any = {
     domain: ['#6366f1']
   };
-view: [number, number] = [0, 300]; // ✅ 0 width = auto-fill container width
+view: [number, number] = [0, 300]; 
 
 
   liveAlerts: LiveAlert[] = [
@@ -122,11 +122,43 @@ view: [number, number] = [0, 300]; // ✅ 0 width = auto-fill container width
   ngOnInit(): void {
     this.loadViolationAnalytics();
     this.loadMonthlyTrends();
+    this.activeAndInactiveCameras();
   }
 formatMonthYear(date: Date): string {
   const month = date.toLocaleString('default', { month: 'long' });
   const year = date.getFullYear();
   return `${month}_${year}`;
+}
+
+total_cameras: number = 0;
+active_cameras: number = 0;
+inactive_cameras: number = 0
+  loading = false;
+  activeAndInactiveCameras(): void {
+    this.loading = true;
+    this.configService.get('api/cameras/status/').subscribe({
+      next: (response: CameraDetailResponse) => {
+        this.total_cameras   = response.total_cameras;
+        this.active_cameras  = response.active_cameras;
+        this.inactive_cameras = response.inactive_cameras;
+       
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading camera status:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load camera status'
+        });
+        this.loading = false;
+      }
+    });
+  }
+  // systemHealthPercent=this.active_cameras/this.total_cameras*100;
+  get systemHealthPercent(): number {
+  if (!this.total_cameras) return 0;       // guard against 0/0
+  return Math.round((this.active_cameras / this.total_cameras) * 100);
 }
   loadViolationAnalytics(): void {
     this.loadingAnalytics = true;

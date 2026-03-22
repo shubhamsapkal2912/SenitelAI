@@ -9,9 +9,9 @@ from .views import (
     ViolationCountStatsView,
     ViolationExcelExportView,
     ViolationPeriodReportView,
-    ViolationModelAnalyticsView,   # ✅ new
-    ViolationCameraWiseView,       # ✅ new
-    ViolationLocationWiseView,     # ✅ new
+    ViolationModelAnalyticsView,   
+    ViolationCameraWiseView,       
+    ViolationLocationWiseView,    
 )
 
 router = DefaultRouter()
@@ -25,7 +25,7 @@ urlpatterns = [
         name="violation-analytics",
     ),
 
-    # ── ✅ Per-model analytics ────────────────────────────────────────────────
+   
     # GET /violations/analytics/model/<model_id>/?month=March_2026
     path(
         "violations/analytics/model/<int:model_id>/",
@@ -33,7 +33,7 @@ urlpatterns = [
         name="violation-model-analytics",
     ),
 
-    # ── ✅ Camera-wise comparison ─────────────────────────────────────────────
+   
     # GET /violations/analytics/camera-wise/?cameras=1,2,3&month=March_2026
     path(
         "violations/analytics/camera-wise/",
@@ -41,7 +41,7 @@ urlpatterns = [
         name="violation-camera-wise",
     ),
 
-    # ── ✅ Location-wise analytics ────────────────────────────────────────────
+   
     # GET /violations/analytics/location-wise/?month=March_2026&top=10
     path(
         "violations/analytics/location-wise/",

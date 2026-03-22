@@ -42,8 +42,7 @@
       </div>
 
       <div class="kpi-progress">
-        <div class="progress-bar"
-             style="width: 75%; background: var(--primary-color);"></div>
+        <div class="progress-bar" style="width: 75%; background: var(--primary-color);"></div>
       </div>
 
       <p class="kpi-footer">vs. yesterday</p>
@@ -68,8 +67,7 @@
       </div>
 
       <div class="kpi-progress">
-        <div class="progress-bar"
-             style="width: 45%; background: var(--indigo-500);"></div>
+        <div class="progress-bar" style="width: 45%; background: var(--indigo-500);"></div>
       </div>
 
       <p class="kpi-footer">vs. yesterday</p>
@@ -94,8 +92,7 @@
       </div>
 
       <div class="kpi-progress">
-        <div class="progress-bar"
-             style="width: 60%; background: var(--orange-500);"></div>
+        <div class="progress-bar" style="width: 60%; background: var(--orange-500);"></div>
       </div>
 
       <p class="kpi-footer">vs. yesterday</p>
@@ -120,13 +117,11 @@
       </div>
 
       <div class="kpi-progress">
-        <div class="progress-bar"
-             [style.width.%]="systemHealthPercent"
-             style="background: var(--green-500);"></div>
+        <div class="progress-bar" [style.width.%]="systemHealthPercent" style="background: var(--green-500);"></div>
       </div>
 
       <p class="kpi-footer">
-        {{ activeCameras }}/{{ totalCameras }} Cameras Active
+        {{ active_cameras }}/{{ total_cameras }} Cameras Active
       </p>
     </div>
 
@@ -153,49 +148,24 @@
           </p>
         </div>
 
-
-        <!-- ✅ Month Calendar Selector -->
         <div class="time-selector">
 
-          <p-calendar
-  [(ngModel)]="selectedMonth"
-  view="month"
-  dateFormat="MM yy"
-  [yearNavigator]="true"
-  yearRange="2023:2030"
-  [maxDate]="maxDate"
-  (onSelect)="onMonthChange()"
-  [showIcon]="true"
-  styleClass="month-picker">
-</p-calendar>
+          <p-calendar [(ngModel)]="selectedMonth" view="month" dateFormat="MM yy" [yearNavigator]="true"
+            yearRange="2023:2030" [maxDate]="maxDate" (onSelect)="onMonthChange()" [showIcon]="true"
+            styleClass="month-picker">
+          </p-calendar>
 
         </div>
 
       </div>
 
-
-
       <!-- Chart Container -->
       <div class="chart-container">
 
-        <ngx-charts-line-chart
-          *ngIf="lineChartData.length > 0"
-          [view]="view"
-          [results]="lineChartData"
-          [scheme]="colorScheme"
-          [gradient]="false"
-          [xAxis]="true"
-          [yAxis]="true"
-          [showXAxisLabel]="true"
-          [showYAxisLabel]="true"
-          xAxisLabel="Days"
-          yAxisLabel="Violations"
-          [yScaleMin]="0"
-          [yScaleMax]="yScaleMax"
-          [yAxisTickFormatting]="yAxisTickFormatting"
-          [legend]="false"
-          [timeline]="false"
-          [animations]="true"
+        <ngx-charts-line-chart *ngIf="lineChartData.length > 0" [view]="view" [results]="lineChartData"
+          [scheme]="colorScheme" [gradient]="false" [xAxis]="true" [yAxis]="true" [showXAxisLabel]="true"
+          [showYAxisLabel]="true" xAxisLabel="Days" yAxisLabel="Violations" [yScaleMin]="0" [yScaleMax]="yScaleMax"
+          [yAxisTickFormatting]="yAxisTickFormatting" [legend]="false" [timeline]="false" [animations]="true"
           [autoScale]="false">
         </ngx-charts-line-chart>
 
@@ -256,8 +226,7 @@
 
             <div class="alert-badges">
 
-              <span class="alert-badge"
-                    [class]="'badge-' + alert.severity">
+              <span class="alert-badge" [class]="'badge-' + alert.severity">
                 {{ alert.severityLabel }}
               </span>
 
@@ -275,10 +244,7 @@
 
 
       <div class="alerts-footer">
-        <p-button
-          label="Export Incident Report"
-          [outlined]="true"
-          styleClass="w-full export-btn">
+        <p-button label="Export Incident Report" [outlined]="true" styleClass="w-full export-btn">
         </p-button>
       </div>
 

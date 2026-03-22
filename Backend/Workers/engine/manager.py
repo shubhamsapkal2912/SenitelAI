@@ -23,7 +23,7 @@ def _resolve_model_path(use_case: str) -> str:
     if not os.path.isdir(models_dir):
         raise FileNotFoundError(f"[Manager] Models directory not found: {models_dir}")
 
-    # ✅ pick the first .pt file found in the models/ folder
+    # pick the first .pt file found in the models/ folder
     pt_files = [f for f in os.listdir(models_dir) if f.endswith(".pt")]
 
     if not pt_files:

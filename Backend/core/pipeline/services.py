@@ -6,7 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 RABBITMQ_URL    = os.environ.get("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/")
-CONTROL_EXCHANGE = "pipeline_control"   # fanout exchange name
+CONTROL_EXCHANGE = "pipeline_control"   
 
 
 def publish_pipeline_command(action: str, pipeline):
@@ -14,7 +14,7 @@ def publish_pipeline_command(action: str, pipeline):
         conn = pika.BlockingConnection(pika.URLParameters(RABBITMQ_URL))
         ch   = conn.channel()
 
-        # ✅ Declare a fanout exchange — all bound queues get every message
+       
         ch.exchange_declare(
             exchange=CONTROL_EXCHANGE,
             exchange_type="fanout",
@@ -25,7 +25,7 @@ def publish_pipeline_command(action: str, pipeline):
             "action":              action,
             "pipeline_id":         pipeline.pk,
             "camera_id":           pipeline.camera.pk,
-            "ml_model_id":         pipeline.ml_model.pk,          # ✅ add this
+            "ml_model_id":         pipeline.ml_model.pk,         
             "rtsp_url":            pipeline.camera.rtsp_url,
             "use_case":            pipeline.use_case,
             "threshold_parameter": pipeline.ml_model.threshold_parameter,
@@ -34,8 +34,8 @@ def publish_pipeline_command(action: str, pipeline):
         }
 
         ch.basic_publish(
-            exchange=CONTROL_EXCHANGE,   # ✅ publish to exchange, not queue
-            routing_key="",              # fanout ignores routing_key
+            exchange=CONTROL_EXCHANGE,   
+            routing_key="",              
             body=json.dumps(payload),
             properties=pika.BasicProperties(delivery_mode=2),
         )

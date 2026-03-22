@@ -16,74 +16,46 @@
 
     <!-- Navigation -->
     <nav class="sidebar-nav">
-      <a
-        *ngFor="let item of navItems(); trackBy: trackByFn"
-        [routerLink]="item.routerLink"
-        routerLinkActive="active"
-        class="nav-item"
-        pRipple
-      >
+      <a *ngFor="let item of navItems(); trackBy: trackByFn" [routerLink]="item.routerLink" routerLinkActive="active"
+        class="nav-item" pRipple>
         <i class="nav-icon pi" [ngClass]="'pi-' + item.icon"></i>
         <span class="nav-label" *ngIf="!isCollapsed()">{{ item.label }}</span>
-        <p-badge
-          *ngIf="item.badge && !isCollapsed()"
-          [value]="item.badge"
-          severity="danger"
-        />
+        <p-badge *ngIf="item.badge && !isCollapsed()" [value]="item.badge" severity="danger" />
       </a>
     </nav>
-
     <!-- Sidebar Footer -->
     <div class="sidebar-footer">
 
       <!-- Sidebar Collapse / Expand Toggle -->
-      <button
-        class="action-btn collapse-btn"
-        (click)="toggleCollapse()"
-        pRipple
-        [pTooltip]="isCollapsed() ? 'Expand Sidebar' : 'Collapse Sidebar'"
-        tooltipPosition="right"
-      >
-        <i
-          class="pi"
-          [ngClass]="isCollapsed() ? 'pi-angle-double-right' : 'pi-angle-double-left'"
-        ></i>
+      <button class="action-btn collapse-btn" (click)="toggleCollapse()" pRipple
+        [pTooltip]="isCollapsed() ? 'Expand Sidebar' : 'Collapse Sidebar'" tooltipPosition="right">
+        <i class="pi" [ngClass]="isCollapsed() ? 'pi-angle-double-right' : 'pi-angle-double-left'"></i>
         <span *ngIf="!isCollapsed()">Collapse</span>
       </button>
 
       <!-- User Profile with Menu -->
-      <div class="user-profile">
-        <p-avatar
-          [label]="currentUser().name.charAt(0).toUpperCase()"
-          shape="circle"
-          size="large"
-          styleClass="mr-2 user-avatar"
-        />
+      <div class="user-profile" [class.profile-clickable]="isCollapsed()"
+        (click)="isCollapsed() ? toggleProfileMenu($event) : null"
+        [pTooltip]="isCollapsed() ? currentUser().name + ' · ' + currentUser().role : ''" tooltipPosition="right"
+        pRipple>
+        <p-avatar [label]="currentUser().name.charAt(0).toUpperCase()" shape="circle" size="large"
+          styleClass="mr-2 user-avatar" />
         <div class="user-info" *ngIf="!isCollapsed()">
           <p class="user-name">{{ currentUser().name }}</p>
           <p class="user-role">{{ currentUser().role }}</p>
         </div>
-        <button
-          class="profile-menu-btn"
-          *ngIf="!isCollapsed()"
-          (click)="toggleProfileMenu($event)"
-          pRipple
-          pTooltip="Profile Menu"
-          tooltipPosition="top"
-        >
+        <button class="profile-menu-btn" *ngIf="!isCollapsed()"
+          (click)="toggleProfileMenu($event); $event.stopPropagation()" pRipple pTooltip="Profile Menu"
+          tooltipPosition="top">
           <i class="pi pi-ellipsis-v"></i>
         </button>
       </div>
 
       <!-- Profile Overlay Menu -->
-      <p-menu
-        #profileMenu
-        [model]="profileMenuItems"
-        [popup]="true"
-        styleClass="profile-menu-overlay"
-      ></p-menu>
+      <p-menu #profileMenu [model]="profileMenuItems" [popup]="true" styleClass="profile-menu-overlay"></p-menu>
 
     </div>
+
   </aside>
 
   <!-- Main Content Area -->

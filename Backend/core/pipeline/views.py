@@ -22,7 +22,7 @@ class PipelineViewSet(viewsets.ModelViewSet):
             )
 
         try:
-            pipeline.is_active = True           # ✅ flip to True immediately
+            pipeline.is_active = True          
             pipeline.save()
             publish_pipeline_command('start', pipeline)
             return Response(PipelineSerializer(pipeline).data)
@@ -42,7 +42,7 @@ class PipelineViewSet(viewsets.ModelViewSet):
             )
 
         try:
-            pipeline.is_active = False          # ✅ flip to False immediately
+            pipeline.is_active = False          
             pipeline.save()
             publish_pipeline_command('stop', pipeline)
             return Response(PipelineSerializer(pipeline).data)
@@ -51,5 +51,5 @@ class PipelineViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='active')
     def active(self, request):
-        qs = self.queryset.filter(is_active=True)       # ✅ simple boolean filter
+        qs = self.queryset.filter(is_active=True)      
         return Response(PipelineSerializer(qs, many=True).data)

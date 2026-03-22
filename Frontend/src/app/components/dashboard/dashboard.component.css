@@ -412,3 +412,18 @@
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+/* Collapsed avatar — clickable state */
+.user-profile.profile-clickable {
+  cursor: pointer;
+}
+
+/* Glowing ring on avatar hover when collapsed */
+.app-container.collapsed .user-profile:hover ::ng-deep .p-avatar {
+  box-shadow: 0 0 0 3px var(--primary-color);
+  transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Scale avatar slightly on hover when collapsed */
+.app-container.collapsed .user-profile:hover {
+  background: var(--surface-hover);
+}

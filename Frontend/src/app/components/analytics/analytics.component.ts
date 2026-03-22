@@ -14,6 +14,7 @@ import { MessageService } from 'primeng/api';
 import { Subject, forkJoin } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { LegendPosition } from '@swimlane/ngx-charts';
+import { DialogModule } from 'primeng/dialog';
 // ── Interfaces ──────────────────────────────────────────────────────────────
 interface ModelOption  { id: number; name: string; }
 interface CameraOption { id: number; name: string; location?: string; }
@@ -27,7 +28,7 @@ interface MultiSeries  { name: string; series: ChartPoint[]; }
     CommonModule, FormsModule,
     ButtonModule, DropdownModule, MultiSelectModule,
     CalendarModule, TooltipModule, RippleModule,
-    NgxChartsModule, ToastModule
+    NgxChartsModule, ToastModule ,DialogModule
   ],
   templateUrl: './analytics.component.html',
   styleUrls: ['./analytics.component.css'],
@@ -310,4 +311,112 @@ loadAvailableCameras(): void {
     const all = data.flatMap(s => s.series.map(p => p.value));
     return all.length ? Math.max(...all) + 1 : 5;
   }
+  showDownloadDialog  = false;
+isDownloading       = false;
+downloadSection:    'model' | 'camera' | 'location' = 'model';
+downloadChartType:  'bar' | 'pie' | 'line'          = 'bar';
+downloadPreviewView: [number, number]                = [580, 300];
+
+// Computed data routed to the preview chart
+get downloadBarData(): ChartPoint[] {
+  if (this.downloadSection === 'model')    return this.modelBarData;
+  if (this.downloadSection === 'camera')   return this.cameraBarData;
+  return this.locationBarData;
+}
+
+get downloadLineData(): MultiSeries[] {
+  if (this.downloadSection === 'model')  return this.modelLineData;
+  if (this.downloadSection === 'camera') return this.cameraLineData;
+  return [];
+}
+
+get downloadColorScheme(): any {
+  return this.downloadSection === 'model' ? this.colorSchemeModel : this.colorScheme;
+}
+
+get downloadYMax(): number { return this.yMax(this.downloadBarData); }
+get downloadYMaxMulti(): number { return this.yMaxMulti(this.downloadLineData); }
+
+get availableChartTypes(): Array<{ label: string; value: string; icon: string }> {
+  const types = [
+    { label: 'Bar',  value: 'bar',  icon: 'pi pi-chart-bar'  },
+    { label: 'Pie',  value: 'pie',  icon: 'pi pi-chart-pie'  },
+  ];
+  if (this.downloadSection !== 'location') {
+    types.push({ label: 'Line', value: 'line', icon: 'pi pi-chart-line' });
+  }
+  return types;
+}
+
+get downloadSectionLabel(): string {
+  if (this.downloadSection === 'model')    return 'Model Comparison';
+  if (this.downloadSection === 'camera')   return 'Camera Comparison';
+  return 'Location Hotspots';
+}
+
+openDownloadDialog(): void {
+  this.downloadSection   = 'model';
+  this.downloadChartType = 'bar';
+  this.showDownloadDialog = true;
+}
+
+onDownloadSectionChange(section: 'model' | 'camera' | 'location'): void {
+  this.downloadSection = section;
+  if (section === 'location' && this.downloadChartType === 'line') {
+    this.downloadChartType = 'bar';
+  }
+}
+
+setDownloadChartType(value: string): void {
+  this.downloadChartType = value as 'bar' | 'pie' | 'line';
+}
+
+downloadPng(): void {
+  this.isDownloading = true;
+
+  // Small delay lets the chart render after type switch
+  setTimeout(() => {
+    const box = document.querySelector('.dl-preview-box') as HTMLElement;
+    if (!box) { this.isDownloading = false; return; }
+
+    const svgEl = box.querySelector('svg');
+    if (!svgEl) { this.isDownloading = false; return; }
+
+    // Clone and add a white background rect for clean export
+    const clone = svgEl.cloneNode(true) as SVGElement;
+    const bg    = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    bg.setAttribute('width',  '100%');
+    bg.setAttribute('height', '100%');
+    bg.setAttribute('fill',   '#ffffff');
+    clone.insertBefore(bg, clone.firstChild);
+
+    const svgStr  = new XMLSerializer().serializeToString(clone);
+    const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+    const url     = URL.createObjectURL(svgBlob);
+
+    const img     = new Image();
+    img.onload    = () => {
+      const w = svgEl.clientWidth  || 580;
+      const h = svgEl.clientHeight || 300;
+
+      const canvas  = document.createElement('canvas');
+      canvas.width  = w * 2;   // 2× for retina sharpness
+      canvas.height = h * 2;
+      const ctx     = canvas.getContext('2d')!;
+      ctx.scale(2, 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+
+      const link      = document.createElement('a');
+      link.download   = `violations_${this.downloadSection}_${this.formatMonthYear(this.selectedMonth)}.png`;
+      link.href       = canvas.toDataURL('image/png');
+      link.click();
+      this.isDownloading = false;
+    };
+    img.onerror = () => { this.isDownloading = false; };
+    img.src = url;
+  }, 300);
+}
 }

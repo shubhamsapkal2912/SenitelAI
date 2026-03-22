@@ -5,7 +5,9 @@ import { ConfigService } from '../../services/config.service';
 import {
   Camera,
   CameraListResponse,
-  CameraCreatePayload
+  CameraCreatePayload,
+  CameraDetailResponse
+
 } from '../../helpers/model/models';
 
 // PrimeNG Imports
@@ -23,9 +25,9 @@ import { MessageService } from 'primeng/api';
 import { ConfirmationService } from 'primeng/api';
 
 interface Metrics {
-  totalDeployed: number;
-  active: number;
-  inactive: number;
+  total_cameras: number;
+  active_cameras: number;
+  inactive_cameras: number;
   uptimePercentage: number;
 }
 
@@ -64,7 +66,7 @@ export class CameraManagementComponent implements OnInit {
 
   // Data
   cameras: Camera[] = [];
-  metrics: Metrics = { totalDeployed: 0, active: 0, inactive: 0, uptimePercentage: 0 };
+  metrics: Metrics = { total_cameras: 0, active_cameras: 0, inactive_cameras: 0, uptimePercentage: 0 };
 
   // Modal state
   editingCamera: Camera | null = null;
@@ -82,38 +84,65 @@ export class CameraManagementComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.loadCameras();
-  }
+  this.activeAndInactiveCameras(); 
+  this.loadCameras();
+}
 
-  loadCameras(): void {
-    this.loading = true;
-
-    const params = new URLSearchParams();
-    params.set('page', this.currentPage.toString());
-    params.set('page_size', this.rows.toString());
-
-    if (this.searchQuery.trim()) {
-      params.set('search', this.searchQuery.trim());
+total_cameras: number = 0;
+active_cameras: number = 0;
+inactive_cameras: number = 0
+activeAndInactiveCameras(): void {
+  this.loading = true;
+  this.configService.get('api/cameras/status/').subscribe({
+    next: (response: CameraDetailResponse) => {
+      this.total_cameras   = response.total_cameras;
+      this.active_cameras  = response.active_cameras;
+      this.inactive_cameras = response.inactive_cameras;
+      this.updateMetrics(); 
+      this.loading = false;
+    },
+    error: (error) => {
+      console.error('Error loading camera status:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to load camera status'
+      });
+      this.loading = false;
     }
+  });
+}
 
-    this.configService.get(`api/cameras/?${params.toString()}`).subscribe({
-      next: (response: CameraListResponse) => {
-        this.cameras = response.results;
-        this.totalRecords = response.count;
-        this.updateMetrics();
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading cameras:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to load cameras'
-        });
-        this.loading = false;
-      }
-    });
+loadCameras(): void {
+  this.loading = true;
+
+  const params = new URLSearchParams();
+  params.set('page', this.currentPage.toString());
+  params.set('page_size', this.rows.toString());
+
+  if (this.searchQuery.trim()) {
+    params.set('search', this.searchQuery.trim());
   }
+
+  this.configService.get(`api/cameras/?${params.toString()}`).subscribe({
+    next: (response: CameraListResponse) => {
+      this.cameras      = response.results;
+      this.totalRecords = response.count;
+     
+      this.loading = false;
+    },
+    error: (error) => {
+      console.error('Error loading cameras:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to load cameras'
+      });
+      this.loading = false;
+    }
+  });
+}
+
 
   onSearch(): void {
     this.currentPage = 1;
@@ -188,6 +217,7 @@ export class CameraManagementComponent implements OnInit {
           });
           this.closeDialog();
           this.loadCameras();
+          this.activeAndInactiveCameras(); 
         },
         error: (error) => {
           console.error('Update error:', error);
@@ -246,6 +276,7 @@ export class CameraManagementComponent implements OnInit {
               detail: `Camera "${camera.name}" ${action}d successfully`
             });
             this.loadCameras();
+            this.activeAndInactiveCameras(); 
           },
           error: (error) => {
             console.error('Toggle error:', error);
@@ -278,6 +309,7 @@ export class CameraManagementComponent implements OnInit {
               detail: `Camera "${camera.name}" deleted successfully`
             });
             this.loadCameras();
+            this.activeAndInactiveCameras();
           },
           error: (error) => {
             console.error('Delete error:', error);
@@ -362,15 +394,13 @@ export class CameraManagementComponent implements OnInit {
     return this.cameras;
   }
 
-  private updateMetrics(): void {
-    const activeCount = this.cameras.filter(c => c.status === 'active').length;
-    const inactiveCount = this.cameras.filter(c => c.status === 'inactive').length;
+private updateMetrics(): void {
+  this.metrics = {
+    total_cameras:    this.total_cameras,    
+    active_cameras:   this.active_cameras,   
+    inactive_cameras: this.inactive_cameras, 
+    uptimePercentage: 97.3
+  };
+}
 
-    this.metrics = {
-      totalDeployed: this.totalRecords,
-      active: activeCount,
-      inactive: inactiveCount,
-      uptimePercentage: 97.3
-    };
-  }
 }

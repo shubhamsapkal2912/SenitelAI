@@ -131,7 +131,7 @@ class ViolationAnalyticsView(APIView):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# ✅ NEW — Per-model analytics (used by Model Comparison panel)
+# Per-model analytics (used by Model Comparison panel)
 # GET /violations/analytics/model/<model_id>/?month=March_2026
 # Response: { total_violations, daily_trends: [{day, total}] }
 # ══════════════════════════════════════════════════════════════════════════════
@@ -168,7 +168,7 @@ class ViolationModelAnalyticsView(APIView):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# ✅ NEW — Camera-wise comparison (used by Camera Comparison panel)
+# Camera-wise comparison (used by Camera Comparison panel)
 # GET /violations/analytics/camera-wise/?cameras=1,2,3&month=March_2026
 # Response: { cameras: [{ camera_id, camera_name, total_violations,
 #                         daily_trends: [{day, total}] }] }

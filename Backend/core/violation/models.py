@@ -21,7 +21,7 @@ class Violation(models.Model):
         blank=True
     )
 
-    # ✅ NEW FIELD
+    
     plate_number = models.CharField(
         max_length=20,
         null=True,

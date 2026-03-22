@@ -230,7 +230,7 @@ func main() {
         log.Fatalf("Channel error: %v", err)
     }
 
-    // ✅ Declare the same fanout exchange
+    // Declare the same fanout exchange
     ch.ExchangeDeclare(
         "pipeline_control", // name
         "fanout",           // type
@@ -238,7 +238,7 @@ func main() {
         false, false, false, nil,
     )
 
-    // ✅ Dedicated queue for Go — auto-deleted when Go disconnects
+    //  Dedicated queue for Go — auto-deleted when Go disconnects
     q, err := ch.QueueDeclare(
         "pipeline_control.stream_parser", // unique name for Go
         true,                             // durable
@@ -248,7 +248,7 @@ func main() {
         log.Fatalf("Queue declare error: %v", err)
     }
 
-    // ✅ Bind this queue to the fanout exchange
+    //  Bind this queue to the fanout exchange
     ch.QueueBind(q.Name, "", "pipeline_control", false, nil)
 
     msgs, err := ch.Consume(q.Name, "stream-parser", false, false, false, false, nil)

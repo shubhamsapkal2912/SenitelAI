@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🚦 SenitelAI
+# 🚦 SenitelAI 
 
 **AI-Powered Traffic Surveillance & Violation Detection System**
 

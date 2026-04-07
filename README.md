@@ -1,10 +1,10 @@
 <div align="center">
 
-# 🚦 SentinelAI
+# 🚦 SenitelAI
 
 **AI-Powered Traffic Surveillance & Violation Detection System**
 
-SentinelAI is a real-time, end-to-end intelligent traffic monitoring platform that ingests live RTSP camera streams, runs computer vision inference using YOLOv8, and automatically detects traffic violations including **overspeeding**, **no helmet**, and **signal jumping**.
+SenitelAI is a real-time, end-to-end intelligent traffic monitoring platform that ingests live RTSP camera streams, runs computer vision inference using YOLOv8, and automatically detects traffic violations including **overspeeding**, **no helmet**, and **signal jumping**.
 
 [
 [
@@ -121,8 +121,8 @@ SentinelAI/
 ### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/<your-username>/SentinelAI.git
-cd SentinelAI
+git clone https://github.com/shubhamsapkal2912/SenitelAI.git
+cd SenitelAI
 ```
 
 ***

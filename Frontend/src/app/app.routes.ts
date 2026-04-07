@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './components/login/login.component';
-import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { SidebarComponent } from './components/sidebar/sidebar.component';
 
 
 export const routes: Routes = [
@@ -15,7 +15,7 @@ export const routes: Routes = [
   // Protected dashboard route
   {
     path: 'dashboard',
-    component: DashboardComponent,
+    component: SidebarComponent,
     children: [
       {
         path: 'live-feed',
@@ -34,8 +34,8 @@ export const routes: Routes = [
       },
       {
         path: 'overview',
-        loadComponent: () => import('./components/dashboard-overview/dashboard-overview.component').then(m => m.DashboardOverviewComponent),
-        title: 'Dashboard Overview'
+        loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
+        title: 'Dashboard'
       },
       {
         path:'violation-report',

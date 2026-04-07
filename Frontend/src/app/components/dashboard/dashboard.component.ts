@@ -1,24 +1,34 @@
-import { Component, OnInit, signal, computed, ViewChild, effect } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthenticationService } from '../../services/authentication.service'; // Adjust path
-
-// PrimeNG Imports
 import { ButtonModule } from 'primeng/button';
-import { AvatarModule } from 'primeng/avatar';
-import { BadgeModule } from 'primeng/badge';
-import { RippleModule } from 'primeng/ripple';
 import { TooltipModule } from 'primeng/tooltip';
-import { MenuModule } from 'primeng/menu';
-import { MenuItem } from 'primeng/api';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RippleModule } from 'primeng/ripple';
+import { InputTextModule } from 'primeng/inputtext';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { ConfigService } from '../../services/config.service';
+import { MessageService } from 'primeng/api';
+import { CalendarModule } from 'primeng/calendar';
+import { FormsModule } from '@angular/forms';
+import { CameraDetailResponse } from '../../helpers/model/models';
+interface MLModelAnalytics {
+  id: number;
+  name: string;
+  total_violations: number;
+}
 
-interface NavItem {
-  id: string;
-  icon: string;
-  label: string;
-  routerLink: string;
-  badge?: number;
+interface ViolationAnalytics {
+  total_violations: number;
+  ml_models: MLModelAnalytics[];
+}
+
+interface LiveAlert {
+  title: string;
+  time: string;
+  location: string;
+  severity: string;
+  severityLabel: string;
+  camera: string;
+  image: string;
 }
 
 @Component({
@@ -26,206 +36,263 @@ interface NavItem {
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule,
-    RouterOutlet,
-    RouterLink,
-    RouterLinkActive,
     ButtonModule,
-    AvatarModule,
-    BadgeModule,
-    RippleModule,
     TooltipModule,
-    MenuModule
+    RippleModule,
+    InputTextModule,
+    NgxChartsModule,   
+    CalendarModule,
+    FormsModule
   ],
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+  styleUrls: ['./dashboard.component.css'],
+  providers: [MessageService]
 })
 export class DashboardComponent implements OnInit {
-  @ViewChild('profileMenu') profileMenu!: any;
+  selectedTimeRange: string = 'daily';
 
-  // Signals
-  isDark = signal(false);
-  isCollapsed = signal(false);
+  // KPI values
+  totalViolations: number = 0;
+  helmetMissingCount: number = 0;
+  signalJumpCount: number = 0;
+  
+  totalCameras: number = 42;
+  activeCameras: number = 41;
+  selectedMonth: Date = new Date();
+  maxDate: Date = new Date();
+yAxisTickFormatting = (value: number) => {
+  if (value % 1 !== 0) return ''; // hide 0.25, 0.5, 0.75 etc.
+  return Math.round(value).toString();
+};
 
-  // Computed: Load user from localStorage (reactive)
-  currentUser = computed(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        const user = JSON.parse(userData);
-        return {
-          name: user.name || user.username || 'Admin User',
-          email: user.email || '',
-          role: this.getUserRole(user),
-          avatar: ''
-        };
-      } catch {
-        return this.getDefaultUser();
-      }
-    }
-    return this.getDefaultUser();
-  });
 
-  // Profile menu items
-  profileMenuItems: MenuItem[] = [];
+  loadingAnalytics: boolean = false;
+  loadingTrends: boolean = false;
 
-  // Navigation items for Sentinel AI system
-  private readonly sentinelNavItems: NavItem[] = [
+  currentMonth: string = '';
+
+ 
+  lineChartData: any[] = [];
+
+ 
+  colorScheme: any = {
+    domain: ['#6366f1']
+  };
+view: [number, number] = [0, 300]; 
+
+
+  liveAlerts: LiveAlert[] = [
     {
-      id: 'overview',
-      icon: 'th-large',
-      label: 'Dashboard',
-      routerLink: '/dashboard/overview'
-    }
-    ,
-    {
-      id: 'analytics',
-      icon: 'chart-line',
-      label: 'Analytics',
-      routerLink: '/dashboard/analytics'
+      title: 'Red Light Violation', time: 'Now',
+      location: 'Main St & 5th Ave', severity: 'critical',
+      severityLabel: 'Critical', camera: 'Cam-04',
+      image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=200&h=200&fit=crop'
     },
     {
-      id: 'live-feed',
-      icon: 'video',
-      label: 'Live Feed',
-      routerLink: '/dashboard/live-feed',
-     
+      title: 'No Helmet', time: '2m ago',
+      location: 'Baker Ave South', severity: 'warning',
+      severityLabel: 'Warning', camera: 'Cam-12',
+      image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop'
     },
     {
-      id: 'violations',
-      icon: 'exclamation-triangle',
-      label: 'Violations Report',
-      routerLink: '/dashboard/violation-report',
-      
+      title: 'Speeding (85km/h)', time: '5m ago',
+      location: 'Highway 9', severity: 'fine',
+      severityLabel: 'Fine Issued', camera: 'Cam-08',
+      image: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=200&h=200&fit=crop'
     },
     {
-      id: 'violation-detail',
-      icon: 'chart-line',
-      label: 'Violation Detail',
-      routerLink: '/dashboard/violation-detail'
+      title: 'Wrong Way', time: '12m ago',
+      location: 'Exit Ramp 4B', severity: 'urgent',
+      severityLabel: 'Urgent', camera: 'Cam-15',
+      image: 'https://images.unsplash.com/photo-1485463611174-f302f6a5c1c9?w=200&h=200&fit=crop'
     },
     {
-      id: 'cameras',
-      icon: 'camera',
-      label: 'Camera Management',
-      routerLink: '/dashboard/camera-management'
-    },
-    {
-      id:'pipelines',
-      icon: 'wrench',
-      label: 'Pipeline Management',
-      routerLink: '/dashboard/pipeline-management'
+      title: 'Triple Riding', time: '18m ago',
+      location: 'Market Square', severity: 'review',
+      severityLabel: 'Review', camera: 'Cam-23',
+      image: 'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=200&h=200&fit=crop'
     }
   ];
 
-  navItems = computed(() => this.sentinelNavItems);
-
   constructor(
-    private router: Router,
-    private authService: AuthenticationService // Inject auth service
-  ) {
-    this.authService.isAuthenticated$.pipe(
-      takeUntilDestroyed()
-    ).subscribe(isAuth => {
-      if (!isAuth) {
-        this.router.navigate(['/login']);
+    private configService: ConfigService,
+    private messageService: MessageService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadViolationAnalytics();
+    this.loadMonthlyTrends();
+    this.activeAndInactiveCameras();
+  }
+formatMonthYear(date: Date): string {
+  const month = date.toLocaleString('default', { month: 'long' });
+  const year = date.getFullYear();
+  return `${month}_${year}`;
+}
+
+total_cameras: number = 0;
+active_cameras: number = 0;
+inactive_cameras: number = 0
+  loading = false;
+  activeAndInactiveCameras(): void {
+    this.loading = true;
+    this.configService.get('api/cameras/status/').subscribe({
+      next: (response: CameraDetailResponse) => {
+        this.total_cameras   = response.total_cameras;
+        this.active_cameras  = response.active_cameras;
+        this.inactive_cameras = response.inactive_cameras;
+       
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading camera status:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load camera status'
+        });
+        this.loading = false;
       }
     });
   }
-
-  ngOnInit(): void {
-    // Load saved theme preference
-    const savedTheme = localStorage.getItem('theme');
-    this.isDark.set(savedTheme === 'dark');
-    this.applyTheme();
-
-    // Load collapsed state
-    const savedCollapsed = localStorage.getItem('sidebarCollapsed');
-    this.isCollapsed.set(savedCollapsed === 'true');
-
-    // Initialize profile menu items
-    this.profileMenuItems = [
-      {
-        label: 'Profile',
-        icon: 'pi pi-user',
-        command: () => this.onProfile()
+  // systemHealthPercent=this.active_cameras/this.total_cameras*100;
+  get systemHealthPercent(): number {
+  if (!this.total_cameras) return 0;       // guard against 0/0
+  return Math.round((this.active_cameras / this.total_cameras) * 100);
+}
+  loadViolationAnalytics(): void {
+    this.loadingAnalytics = true;
+    this.configService.get('api/violations/analytics/').subscribe({
+      next: (response: any) => {
+        const analytics: ViolationAnalytics = {
+          total_violations: response.total_violations ?? 0,
+          ml_models: (response.ml_model_wise_violations || []).map((m: any) => ({
+            id: m.ml_model__id,
+            name: m.ml_model__name,
+            total_violations: m.total
+          }))
+        };
+        this.applyAnalyticsToDashboard(analytics);
+        this.loadingAnalytics = false;
       },
-      {
-        label: `Email: ${this.currentUser().email}`,
-        icon: 'pi pi-envelope',
-        disabled: true,
-        styleClass: 'profile-email'
-      },
-      { separator: true },
-      {
-        label: 'Settings',
-        icon: 'pi pi-cog',
-        command: () => this.onSettings()
-      },
-      { separator: true },
-      {
-        label: 'Logout',
-        icon: 'pi pi-sign-out',
-        severity: 'danger',
-        command: () => this.onLogout()
+      error: (error) => {
+        console.error('Error loading violation analytics:', error);
+        this.messageService.add({
+          severity: 'error', summary: 'Error',
+          detail: 'Failed to load dashboard analytics'
+        });
+        this.loadingAnalytics = false;
       }
-    ];
+    });
   }
+onMonthChange(): void {
+  this.loadMonthlyTrends();
+}
+loadMonthlyTrends(): void {
 
-  private getDefaultUser(): { name: string; email: string; role: string; avatar: string } {
-    return {
-      name: 'Admin User',
-      email: '',
-      role: 'System Administrator',
-      avatar: ''
-    };
+  this.loadingTrends = true;
+
+  const monthParam = this.formatMonthYear(this.selectedMonth);
+
+  this.configService
+    .get(`api/violations/monthly-trends/${monthParam}/`)
+    .subscribe({
+
+      next: (response: any) => {
+
+        this.currentMonth = response.current_month || '';
+
+        const rawTrends = response.monthly_trends || [];
+
+        // Map API data → day : total
+        const dataMap = new Map<number, number>();
+        rawTrends.forEach((trend: any) => {
+          dataMap.set(trend.day, trend.total);
+        });
+
+
+        const today = new Date();
+
+        const selectedYear  = this.selectedMonth.getFullYear();
+        const selectedMonth = this.selectedMonth.getMonth();
+
+        const currentYear   = today.getFullYear();
+        const currentMonth  = today.getMonth();
+
+        // Determine if selected month is current month
+        const isCurrentMonth =
+          selectedYear === currentYear &&
+          selectedMonth === currentMonth;
+
+        // Determine last day to display
+        const lastDay = isCurrentMonth
+          ? today.getDate()
+          : new Date(selectedYear, selectedMonth + 1, 0).getDate();
+
+
+        const fullSeries = [];
+
+        for (let day = 1; day <= lastDay; day++) {
+          fullSeries.push({
+            name: `${day}`,
+            value: dataMap.get(day) ?? 0
+          });
+        }
+
+
+        // ngx-charts requires multi-series format
+        this.lineChartData = [
+          {
+            name: 'Violations',
+            series: fullSeries
+          }
+        ];
+
+        this.loadingTrends = false;
+
+      },
+
+      error: (error) => {
+
+        console.error('Error loading monthly trends:', error);
+
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load monthly trends'
+        });
+
+        this.loadingTrends = false;
+
+      }
+
+    });
+
+}
+
+get yScaleMax(): number {
+  if (!this.lineChartData.length || !this.lineChartData[0]?.series?.length) {
+    return 5;
   }
+  const max = Math.max(
+    ...this.lineChartData[0].series.map((s: any) => s.value)
+  );
+  return Math.max(max + 1, 5);
+}
 
-  private getUserRole(user: any): string {
-    // Determine role based on user data or email domain
-    if (user.email?.includes('@admin')) return 'System Administrator';
-    if (user.email?.includes('@city-traffic')) return 'Traffic Officer';
-    if (user.email?.includes('@supervisor')) return 'Supervisor';
-    return 'Operator';
-  }
+  private applyAnalyticsToDashboard(analytics: ViolationAnalytics): void {
+    this.totalViolations = analytics.total_violations;
 
-  trackByFn(index: number, item: NavItem): string {
-    return item.id;
-  }
+    const helmetModel = analytics.ml_models.find(
+      m => m.name.toLowerCase().includes('helmet')
+    );
+    const signalModel = analytics.ml_models.find(
+      m => m.name.toLowerCase().includes('signal') ||
+           m.name.toLowerCase().includes('red light') ||
+           m.name.toLowerCase().includes('signal jump')
+    );
 
-  toggleTheme(): void {
-    this.isDark.update(v => !v);
-    localStorage.setItem('theme', this.isDark() ? 'dark' : 'light');
-    this.applyTheme();
-  }
-
-  private applyTheme(): void {
-    const element = document.documentElement;
-    if (this.isDark()) {
-      element.classList.add('dark-theme'); // Use custom class instead of p-dark
-    } else {
-      element.classList.remove('dark-theme');
-    }
-  }
-
-  toggleCollapse(): void {
-    this.isCollapsed.update(v => !v);
-    localStorage.setItem('sidebarCollapsed', this.isCollapsed().toString());
-  }
-
-  toggleProfileMenu(event: Event): void {
-    this.profileMenu.toggle(event);
-  }
-
-  onProfile(): void {
-    this.router.navigate(['/dashboard/profile']);
-  }
-
-  onSettings(): void {
-    this.router.navigate(['/dashboard/settings']);
-  }
-
-  onLogout(): void {
-    this.authService.logout(); // Use auth service logout
+    this.helmetMissingCount = helmetModel ? helmetModel.total_violations : 0;
+    this.signalJumpCount    = signalModel ? signalModel.total_violations : 0;
   }
 }

@@ -1,66 +1,255 @@
-<div class="app-container" [class.dark]="isDark()" [class.collapsed]="isCollapsed()">
+<div class="dashboard">
 
-  <!-- Sidebar -->
-  <aside class="sidebar">
-
-    <!-- Sidebar Header -->
-    <div class="sidebar-header">
-      <div class="logo">
-        <i class="pi pi-shield"></i>
-      </div>
-      <div class="brand" *ngIf="!isCollapsed()">
-        <h1>Sentinel AI</h1>
-        <p>Traffic Intelligence</p>
-      </div>
+  <!-- Dashboard Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1 class="dashboard-title">Dashboard</h1>
+      <p class="dashboard-subtitle">Real-time violation detection and analytics</p>
     </div>
 
-    <!-- Navigation -->
-    <nav class="sidebar-nav">
-      <a *ngFor="let item of navItems(); trackBy: trackByFn" [routerLink]="item.routerLink" routerLinkActive="active"
-        class="nav-item" pRipple>
-        <i class="nav-icon pi" [ngClass]="'pi-' + item.icon"></i>
-        <span class="nav-label" *ngIf="!isCollapsed()">{{ item.label }}</span>
-        <p-badge *ngIf="item.badge && !isCollapsed()" [value]="item.badge" severity="danger" />
-      </a>
-    </nav>
-    <!-- Sidebar Footer -->
-    <div class="sidebar-footer">
+    <div class="header-actions">
+      <div class="search-wrapper p-input-icon-left">
+        <i class="pi pi-search"></i>
+        <input pInputText type="text" placeholder="Search vehicle, location..." class="search-input" />
+      </div>
 
-      <!-- Sidebar Collapse / Expand Toggle -->
-      <button class="action-btn collapse-btn" (click)="toggleCollapse()" pRipple
-        [pTooltip]="isCollapsed() ? 'Expand Sidebar' : 'Collapse Sidebar'" tooltipPosition="right">
-        <i class="pi" [ngClass]="isCollapsed() ? 'pi-angle-double-right' : 'pi-angle-double-left'"></i>
-        <span *ngIf="!isCollapsed()">Collapse</span>
+      <button class="notification-btn" pRipple>
+        <i class="pi pi-bell"></i>
+        <span class="notification-badge"></span>
       </button>
+    </div>
+  </div>
 
-      <!-- User Profile with Menu -->
-      <div class="user-profile" [class.profile-clickable]="isCollapsed()"
-        (click)="isCollapsed() ? toggleProfileMenu($event) : null"
-        [pTooltip]="isCollapsed() ? currentUser().name + ' · ' + currentUser().role : ''" tooltipPosition="right"
-        pRipple>
-        <p-avatar [label]="currentUser().name.charAt(0).toUpperCase()" shape="circle" size="large"
-          styleClass="mr-2 user-avatar" />
-        <div class="user-info" *ngIf="!isCollapsed()">
-          <p class="user-name">{{ currentUser().name }}</p>
-          <p class="user-role">{{ currentUser().role }}</p>
-        </div>
-        <button class="profile-menu-btn" *ngIf="!isCollapsed()"
-          (click)="toggleProfileMenu($event); $event.stopPropagation()" pRipple pTooltip="Profile Menu"
-          tooltipPosition="top">
-          <i class="pi pi-ellipsis-v"></i>
-        </button>
+
+  <!-- KPI Cards Grid -->
+  <div class="kpi-grid">
+
+    <!-- Total Violations -->
+    <div class="kpi-card">
+      <div class="kpi-icon-bg">
+        <i class="pi pi-exclamation-triangle"></i>
       </div>
 
-      <!-- Profile Overlay Menu -->
-      <p-menu #profileMenu [model]="profileMenuItems" [popup]="true" styleClass="profile-menu-overlay"></p-menu>
+      <div class="kpi-header">
+        <div class="kpi-info">
+          <p class="kpi-label">Total Violations</p>
+          <h3 class="kpi-value">{{ totalViolations | number }}</h3>
+        </div>
+
+        <span class="kpi-trend trend-up">
+          <i class="pi pi-arrow-up"></i> +12%
+        </span>
+      </div>
+
+      <div class="kpi-progress">
+        <div class="progress-bar" style="width: 75%; background: var(--primary-color);"></div>
+      </div>
+
+      <p class="kpi-footer">vs. yesterday</p>
+    </div>
+
+
+    <!-- Helmet Missing -->
+    <div class="kpi-card">
+      <div class="kpi-icon-bg helmet">
+        <i class="pi pi-user"></i>
+      </div>
+
+      <div class="kpi-header">
+        <div class="kpi-info">
+          <p class="kpi-label">Helmet Missing</p>
+          <h3 class="kpi-value">{{ helmetMissingCount | number }}</h3>
+        </div>
+
+        <span class="kpi-trend trend-down">
+          <i class="pi pi-arrow-down"></i> -5%
+        </span>
+      </div>
+
+      <div class="kpi-progress">
+        <div class="progress-bar" style="width: 45%; background: var(--indigo-500);"></div>
+      </div>
+
+      <p class="kpi-footer">vs. yesterday</p>
+    </div>
+
+
+    <!-- Signal Jump -->
+    <div class="kpi-card">
+      <div class="kpi-icon-bg signal">
+        <i class="pi pi-stop-circle"></i>
+      </div>
+
+      <div class="kpi-header">
+        <div class="kpi-info">
+          <p class="kpi-label">Signal Jump</p>
+          <h3 class="kpi-value">{{ signalJumpCount | number }}</h3>
+        </div>
+
+        <span class="kpi-trend trend-up">
+          <i class="pi pi-arrow-up"></i> +22%
+        </span>
+      </div>
+
+      <div class="kpi-progress">
+        <div class="progress-bar" style="width: 60%; background: var(--orange-500);"></div>
+      </div>
+
+      <p class="kpi-footer">vs. yesterday</p>
+    </div>
+
+
+    <!-- System Health -->
+    <div class="kpi-card">
+      <div class="kpi-icon-bg health">
+        <i class="pi pi-video"></i>
+      </div>
+
+      <div class="kpi-header">
+        <div class="kpi-info">
+          <p class="kpi-label">System Health</p>
+          <h3 class="kpi-value">{{ systemHealthPercent }}%</h3>
+        </div>
+
+        <span class="kpi-trend trend-online">
+          <i class="pi pi-check-circle"></i> Online
+        </span>
+      </div>
+
+      <div class="kpi-progress">
+        <div class="progress-bar" [style.width.%]="systemHealthPercent" style="background: var(--green-500);"></div>
+      </div>
+
+      <p class="kpi-footer">
+        {{ active_cameras }}/{{ total_cameras }} Cameras Active
+      </p>
+    </div>
+
+  </div>
+
+
+
+  <!-- Main Content Grid -->
+  <div class="content-grid">
+
+    <!-- Chart Section -->
+    <div class="chart-section">
+
+      <div class="section-header">
+
+        <div class="header-info">
+          <h2 class="section-title">
+            Violation Trends {{ currentMonth }}
+            <span *ngIf="loadingTrends" class="small-loader"></span>
+          </h2>
+
+          <p class="section-subtitle">
+            Daily violations for selected month
+          </p>
+        </div>
+
+        <div class="time-selector">
+
+          <p-calendar [(ngModel)]="selectedMonth" view="month" dateFormat="MM yy" [yearNavigator]="true"
+            yearRange="2023:2030" [maxDate]="maxDate" (onSelect)="onMonthChange()" [showIcon]="true"
+            styleClass="month-picker">
+          </p-calendar>
+
+        </div>
+
+      </div>
+
+      <!-- Chart Container -->
+      <div class="chart-container">
+
+        <ngx-charts-line-chart *ngIf="lineChartData.length > 0" [view]="view" [results]="lineChartData"
+          [scheme]="colorScheme" [gradient]="false" [xAxis]="true" [yAxis]="true" [showXAxisLabel]="true"
+          [showYAxisLabel]="true" xAxisLabel="Days" yAxisLabel="Violations" [yScaleMin]="0" [yScaleMax]="yScaleMax"
+          [yAxisTickFormatting]="yAxisTickFormatting" [legend]="false" [timeline]="false" [animations]="true"
+          [autoScale]="false">
+        </ngx-charts-line-chart>
+
+
+        <!-- Loading -->
+        <div *ngIf="loadingTrends" class="no-data-label">
+          <i class="pi pi-spin pi-spinner"></i>
+          Loading trends...
+        </div>
+
+        <!-- Empty -->
+        <div *ngIf="!lineChartData.length && !loadingTrends" class="no-data-label">
+          No trend data available for this month
+        </div>
+
+      </div>
 
     </div>
 
-  </aside>
 
-  <!-- Main Content Area -->
-  <main class="main-content">
-    <router-outlet></router-outlet>
-  </main>
+
+    <!-- Live Alerts Section -->
+    <div class="alerts-section">
+
+      <div class="alerts-header">
+        <h2 class="alerts-title">
+          <span class="live-indicator">
+            <span class="ping"></span>
+            <span class="dot"></span>
+          </span>
+          Live Detections
+        </h2>
+
+        <button class="view-all-btn">View All</button>
+      </div>
+
+
+      <div class="alerts-list">
+
+        <div class="alert-item" *ngFor="let alert of liveAlerts">
+
+          <div class="alert-image-wrapper">
+            <img [src]="alert.image" [alt]="alert.title" class="alert-image" />
+            <div class="alert-overlay" [class]="'overlay-' + alert.severity"></div>
+          </div>
+
+          <div class="alert-content">
+
+            <div class="alert-header">
+              <h4 class="alert-title">{{ alert.title }}</h4>
+              <span class="alert-time">{{ alert.time }}</span>
+            </div>
+
+            <p class="alert-location">
+              <i class="pi pi-map-marker"></i>
+              {{ alert.location }}
+            </p>
+
+            <div class="alert-badges">
+
+              <span class="alert-badge" [class]="'badge-' + alert.severity">
+                {{ alert.severityLabel }}
+              </span>
+
+              <span class="alert-badge badge-camera">
+                {{ alert.camera }}
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="alerts-footer">
+        <p-button label="Export Incident Report" [outlined]="true" styleClass="w-full export-btn">
+        </p-button>
+      </div>
+
+    </div>
+
+  </div>
 
 </div>

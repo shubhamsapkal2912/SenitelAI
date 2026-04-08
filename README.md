@@ -61,7 +61,7 @@ flowchart TD
 ## 📁 Project Structure
 
 ```bash
-SentinelAI/
+SenitelAI/
 ├── Backend/
 │   ├── core/                          # Django application
 │   │   ├── camera/                    # Camera registration & management

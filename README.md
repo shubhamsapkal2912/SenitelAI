@@ -6,13 +6,6 @@
 
 SenitelAI is a real-time, end-to-end intelligent traffic monitoring platform that ingests live RTSP camera streams, runs computer vision inference using YOLOv8, and automatically detects traffic violations including **overspeeding**, **no helmet**, and **signal jumping**.
 
-[
-[
-[
-[
-[
-[
-
 </div>
 
 ***

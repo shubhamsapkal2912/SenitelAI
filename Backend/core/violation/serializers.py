@@ -24,6 +24,8 @@ class DetectionSerializer(serializers.Serializer):
 
 class ViolationSerializer(serializers.ModelSerializer):
     frame_image = Base64ImageField(required=False, allow_null=True)
+    camera_name = serializers.CharField(source="camera.name", read_only=True)
+    model_name = serializers.CharField(source="ml_model.name", read_only=True)
 
     # optional plate number extracted by worker
     plate_number = serializers.CharField(required=False, allow_null=True)

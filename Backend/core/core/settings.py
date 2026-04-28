@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'camera',
     'mlmodel',
     'pipeline',
+    'video_uploads',
     'violation',
     'channels', 
 ]

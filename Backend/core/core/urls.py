@@ -24,5 +24,6 @@ urlpatterns = [
      path("api/", include("camera.urls")),
      path('api/', include('mlmodel.urls')),
      path('api/', include('pipeline.urls')),
+     path('api/', include('video_uploads.urls')),
      path('api/', include('violation.urls')),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

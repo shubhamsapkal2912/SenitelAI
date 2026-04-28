@@ -104,7 +104,7 @@
           <td>
             <span class="vd-camera">
               <i class="pi pi-video"></i>
-              Camera {{ v.camera }}
+              {{ v.camera_name || ('Camera ' + v.camera) }}
             </span>
           </td>
 
@@ -268,7 +268,7 @@
       </div>
       <div class="vd-meta-item">
         <span class="vd-meta-label"><i class="pi pi-video"></i> Camera</span>
-        <span class="vd-meta-value">Camera {{ selectedViolation.camera }}</span>
+        <span class="vd-meta-value">{{ selectedViolation.camera_name || ('Camera ' + selectedViolation.camera) }}</span>
       </div>
       <!-- <div class="vd-meta-item">
         <span class="vd-meta-label"><i class="pi pi-sitemap"></i> Pipeline</span>

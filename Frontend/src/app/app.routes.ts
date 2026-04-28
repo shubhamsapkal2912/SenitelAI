@@ -33,6 +33,11 @@ export const routes: Routes = [
         title: 'Pipeline Management'
       },
       {
+        path: 'video-uploads',
+        loadComponent: () => import('./components/video-uploads/video-uploads.component').then(m => m.VideoUploadsComponent),
+        title: 'Video Uploads'
+      },
+      {
         path: 'overview',
         loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
         title: 'Dashboard'

@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from calendar import monthrange
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.db.models.functions import TruncDay
 from django.utils import timezone
 from django.http import HttpResponse
@@ -64,9 +64,38 @@ class ViolationPagination(PageNumberPagination):
 
 # ── Base CRUD ──────────────────────────────────────────────────────────────────
 class ViolationViewSet(viewsets.ModelViewSet):
-    queryset         = Violation.objects.all().order_by("-time")
+    queryset         = Violation.objects.select_related("camera", "ml_model", "pipeline", "video_upload").all().order_by("-time")
     serializer_class = ViolationSerializer
     pagination_class = ViolationPagination
+
+    def get_queryset(self):
+        queryset = self.queryset
+        params = self.request.query_params
+
+        search = params.get("search", "").strip()
+        source_type = params.get("source_type", "").strip()
+        video_upload_id = params.get("video_upload", "").strip()
+        camera_id = params.get("camera", "").strip()
+        ml_model_id = params.get("ml_model", "").strip()
+
+        if source_type:
+            queryset = queryset.filter(source_type=source_type)
+        if video_upload_id.isdigit():
+            queryset = queryset.filter(video_upload_id=int(video_upload_id))
+        if camera_id.isdigit():
+            queryset = queryset.filter(camera_id=int(camera_id))
+        if ml_model_id.isdigit():
+            queryset = queryset.filter(ml_model_id=int(ml_model_id))
+        if search:
+            queryset = queryset.filter(
+                Q(violation_type__icontains=search)
+                | Q(plate_number__icontains=search)
+                | Q(camera__name__icontains=search)
+                | Q(ml_model__name__icontains=search)
+                | Q(source_type__icontains=search)
+            )
+
+        return queryset
 
 
 # ══════════════════════════════════════════════════════════════════════════════

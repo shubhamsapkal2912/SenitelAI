@@ -115,6 +115,12 @@ export class SidebarComponent implements OnInit {
       icon: 'wrench',
       label: 'Pipeline Management',
       routerLink: '/dashboard/pipeline-management'
+    },
+    {
+      id: 'video-uploads',
+      icon: 'upload',
+      label: 'Upload Video',
+      routerLink: '/dashboard/video-uploads'
     }
   ];
 

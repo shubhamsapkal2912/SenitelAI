@@ -20,6 +20,7 @@ django-cors-headers==4.9.0
 djangorestframework==3.17.0
 djangorestframework_simplejwt==5.5.1
 drf-extra-fields==3.7.0
+easyocr
 et_xmlfile==2.0.0
 filetype==1.2.0
 hyperlink==21.0.0
@@ -27,7 +28,9 @@ idna==3.11
 Incremental==24.11.0
 kombu==5.6.2
 msgpack==1.1.2
+numpy
 openpyxl==3.1.5
+opencv-python-headless
 packaging==26.0
 pika==1.3.2
 pillow==12.1.1
@@ -49,6 +52,7 @@ typing_extensions==4.15.0
 tzdata==2025.3
 tzlocal==5.3.1
 ujson==5.12.0
+ultralytics
 vine==5.1.0
 wcwidth==0.6.0
 zope.interface==8.2

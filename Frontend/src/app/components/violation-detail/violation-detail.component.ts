@@ -38,9 +38,13 @@ export interface Violation {
   plate_number?: string;
   time: string;
   created_at: string;
-  pipeline: number;
+  pipeline: number | null;
   camera: number;
+  camera_name?: string;
   ml_model: number;
+  model_name?: string;
+  source_type?: string;
+  video_upload?: number | null;
 }
 
 export interface ViolationListResponse {

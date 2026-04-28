@@ -11,6 +11,9 @@
 npm-debug.log
 yarn-error.log
 
+/media/*
+!/media/.gitkeep
+
 # IDEs and editors
 .idea/
 .project

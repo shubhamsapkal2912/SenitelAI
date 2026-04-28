@@ -1,0 +1,327 @@
+<p-toast position="top-right"></p-toast>
+
+<div class="video-uploads-container">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">
+        <i class="pi pi-upload"></i>
+        Video Uploads
+      </h1>
+      <p class="page-subtitle">Upload recorded traffic footage and run the same inference models asynchronously.</p>
+    </div>
+
+    <div class="header-actions">
+      <p-button
+        icon="pi pi-refresh"
+        label="Refresh"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="loadUploads()"
+      />
+      <p-button
+        icon="pi pi-plus"
+        label="Upload Video"
+        (onClick)="openUploadDialog()"
+      />
+    </div>
+  </header>
+
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <span class="metric-label">Total Uploads</span>
+      <strong class="metric-value">{{ totalUploads }}</strong>
+      <small class="metric-note">Managed through the upload queue</small>
+    </div>
+
+    <div class="metric-card">
+      <span class="metric-label">In Progress</span>
+      <strong class="metric-value">{{ processingUploads }}</strong>
+      <small class="metric-note">Queued or actively processing</small>
+    </div>
+
+    <div class="metric-card">
+      <span class="metric-label">Completed</span>
+      <strong class="metric-value">{{ completedUploads }}</strong>
+      <small class="metric-note">Ready for review in the dashboard</small>
+    </div>
+
+    <div class="metric-card">
+      <span class="metric-label">Violations Found</span>
+      <strong class="metric-value">{{ totalViolationsFound }}</strong>
+      <small class="metric-note">Created in the shared violations table</small>
+    </div>
+  </div>
+
+  <div class="action-toolbar">
+    <p-iconField iconPosition="left" class="search-wrapper">
+      <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
+      <input
+        pInputText
+        type="text"
+        [(ngModel)]="searchQuery"
+        (keyup.enter)="onSearch()"
+        placeholder="Search by file, camera, model, or status"
+      />
+    </p-iconField>
+
+    <p-button
+      icon="pi pi-times"
+      label="Clear"
+      severity="secondary"
+      [text]="true"
+      (onClick)="searchQuery = ''; onSearch()"
+    />
+  </div>
+
+  <div class="table-card">
+    <p-table
+      [value]="uploads"
+      [loading]="loading"
+      [tableStyle]="{ 'min-width': '64rem' }"
+      styleClass="video-uploads-table"
+      [rowHover]="true"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Video</th>
+          <th>Camera</th>
+          <th>Model</th>
+          <th>Status</th>
+          <th>Progress</th>
+          <th>Violations</th>
+          <th>Created</th>
+          <th class="actions-cell">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-upload>
+        <tr>
+          <td>
+            <div class="file-cell">
+              <strong>{{ upload.original_name }}</strong>
+              <small>{{ upload.use_case || 'Pending use case resolution' }}</small>
+            </div>
+          </td>
+          <td>{{ upload.camera_name }}</td>
+          <td>{{ upload.model_name }}</td>
+          <td>
+            <p-tag
+              [value]="getStatusLabel(upload.status)"
+              [severity]="getStatusSeverity(upload.status)"
+            ></p-tag>
+          </td>
+          <td>
+            <div class="progress-cell">
+              <p-progressBar
+                [value]="getProgressValue(upload)"
+                [showValue]="false"
+                styleClass="upload-progress"
+              ></p-progressBar>
+              <small>{{ getProgressValue(upload) | number:'1.0-0' }}%</small>
+            </div>
+          </td>
+          <td>
+            <strong>{{ upload.violations_count }}</strong>
+          </td>
+          <td>
+            <div class="date-cell">
+              <span>{{ upload.created_at | date:'dd MMM yyyy' }}</span>
+              <small>{{ upload.created_at | date:'HH:mm:ss' }}</small>
+            </div>
+          </td>
+          <td class="actions-cell">
+            <div class="action-buttons">
+              <p-button
+                icon="pi pi-eye"
+                severity="info"
+                [rounded]="true"
+                [text]="true"
+                [disabled]="!canViewResults(upload)"
+                pTooltip="View upload results"
+                (onClick)="openResults(upload)"
+              ></p-button>
+              <p-button
+                icon="pi pi-refresh"
+                severity="warning"
+                [rounded]="true"
+                [text]="true"
+                *ngIf="canRetry(upload)"
+                pTooltip="Retry processing"
+                (onClick)="retryUpload(upload)"
+              ></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8" class="empty-state">
+            <i class="pi pi-upload"></i>
+            <p>No uploaded videos found.</p>
+            <small>Start by uploading a recorded traffic video.</small>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <p-paginator
+      [first]="first"
+      [rows]="rows"
+      [totalRecords]="totalRecords"
+      (onPageChange)="onPageChange($event)"
+      styleClass="uploads-paginator"
+    ></p-paginator>
+  </div>
+</div>
+
+<p-dialog
+  header="Upload Video"
+  [(visible)]="showUploadDialog"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [appendTo]="'body'"
+  [baseZIndex]="12000"
+  [style]="{ width: '34rem' }"
+  styleClass="upload-video-dialog"
+  (onHide)="closeUploadDialog()"
+>
+  <div class="dialog-form">
+    <div class="form-field">
+      <label>Video File</label>
+      <input #fileInput type="file" accept="video/*" hidden (change)="onFileSelected($event)" />
+      <div class="file-picker">
+        <p-button
+          icon="pi pi-folder-open"
+          label="Choose File"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="chooseFile()"
+        ></p-button>
+        <span>{{ selectedFile?.name || 'No file selected' }}</span>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label for="camera">Camera Reference</label>
+      <p-dropdown
+        inputId="camera"
+        [options]="cameras"
+        [(ngModel)]="uploadForm.camera"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Select a camera"
+        [filter]="true"
+        filterBy="label"
+        [showClear]="true"
+        appendTo="body"
+        styleClass="w-full"
+      ></p-dropdown>
+    </div>
+
+    <div class="form-field">
+      <label for="mlModel">ML Model</label>
+      <p-dropdown
+        inputId="mlModel"
+        [options]="mlModels"
+        [(ngModel)]="uploadForm.ml_model"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Select an ML model"
+        [filter]="true"
+        filterBy="label"
+        [showClear]="true"
+        appendTo="body"
+        styleClass="w-full"
+      ></p-dropdown>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button
+      label="Cancel"
+      severity="secondary"
+      [text]="true"
+      (onClick)="closeUploadDialog()"
+    ></p-button>
+    <p-button
+      label="Upload and Process"
+      icon="pi pi-upload"
+      [loading]="uploading"
+      (onClick)="submitUpload()"
+    ></p-button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  [header]="selectedUpload ? 'Results · ' + selectedUpload.original_name : 'Upload Results'"
+  [(visible)]="showResultsDialog"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [appendTo]="'body'"
+  [baseZIndex]="12000"
+  [style]="{ width: '72rem' }"
+  styleClass="upload-results-dialog"
+  (onHide)="closeResultsDialog()"
+>
+  <div class="results-summary" *ngIf="selectedUpload">
+    <p-tag [value]="selectedUpload.camera_name" severity="info"></p-tag>
+    <p-tag [value]="selectedUpload.model_name" severity="success"></p-tag>
+    <p-tag [value]="selectedUpload.violations_count + ' violations'" severity="warning"></p-tag>
+  </div>
+
+  <p-table
+    [value]="uploadViolations"
+    [tableStyle]="{ 'min-width': '100%' }"
+    styleClass="results-table"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>ID</th>
+        <th>Snapshot</th>
+        <th>Violation</th>
+        <th>Plate</th>
+        <th>Time</th>
+        <th>Source</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-violation>
+      <tr>
+        <td>#{{ violation.id }}</td>
+        <td>
+          <img
+            *ngIf="violation.frame_image"
+            [src]="violation.frame_image"
+            alt="Violation snapshot"
+            class="result-thumb"
+          />
+          <span *ngIf="!violation.frame_image">—</span>
+        </td>
+        <td>{{ violation.violation_type }}</td>
+        <td>{{ violation.plate_number || '—' }}</td>
+        <td>{{ violation.time | date:'dd MMM yyyy, HH:mm:ss' }}</td>
+        <td>{{ violation.source_type | titlecase }}</td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6" class="empty-state">
+          <i class="pi pi-inbox"></i>
+          <p>No violations were generated for this upload.</p>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <p-paginator
+    [first]="violationsFirst"
+    [rows]="violationsRows"
+    [totalRecords]="uploadViolationsCount"
+    (onPageChange)="onViolationPageChange($event)"
+    styleClass="uploads-paginator"
+  ></p-paginator>
+</p-dialog>

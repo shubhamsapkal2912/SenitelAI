@@ -164,6 +164,11 @@
             <!-- Actions -->
             <td>
               <div class="action-buttons">
+                <p-button
+                  icon="pi pi-pencil" [rounded]="true" [text]="true"
+                  severity="info" styleClass="action-btn"
+                  pTooltip="Edit Pipeline" tooltipPosition="top"
+                  (click)="editPipeline(pipeline)" />
                 <p-button *ngIf="canStart(pipeline)"
                   icon="pi pi-play" [rounded]="true" [text]="true"
                   severity="success" styleClass="action-btn"
@@ -222,9 +227,9 @@
   </div>
 </div>
 
-<!-- ===== ADD PIPELINE DIALOG ===== -->
+<!-- ===== ADD / EDIT PIPELINE DIALOG ===== -->
 <p-dialog
-  header="Add New Pipeline"
+  [header]="editingPipeline ? 'Edit Pipeline' : 'Add New Pipeline'"
   [(visible)]="showDialog"
   [modal]="true"
   [closable]="true"
@@ -292,8 +297,8 @@
       ></p-button>
 
       <p-button
-        label="Create Pipeline"
-        icon="pi pi-plus"
+        [label]="editingPipeline ? 'Update Pipeline' : 'Create Pipeline'"
+        [icon]="editingPipeline ? 'pi pi-check' : 'pi pi-plus'"
         [disabled]="!isFormValid() || loading"
         [loading]="loading"
         (click)="savePipeline()"

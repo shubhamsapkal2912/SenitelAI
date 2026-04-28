@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ConfigService } from '../../services/config.service';
@@ -87,6 +87,7 @@ export class PipelineManagementComponent implements OnInit {
   cameraOptions: DropdownOption[] = [];
   modelOptions: DropdownOption[] = [];
 
+  editingPipeline: Pipeline | null = null;
   currentPipeline: PipelineCreatePayload = { camera: null, ml_model: null };
 
   constructor(
@@ -176,7 +177,17 @@ export class PipelineManagementComponent implements OnInit {
   // ─── Dialog ───────────────────────────────────────────────────────────────
 
   addNewPipeline(): void {
+    this.editingPipeline = null;
     this.currentPipeline = { camera: null, ml_model: null };
+    this.showDialog = true;
+  }
+
+  editPipeline(pipeline: Pipeline): void {
+    this.editingPipeline = pipeline;
+    this.currentPipeline = {
+      camera: pipeline.camera,
+      ml_model: pipeline.ml_model,
+    };
     this.showDialog = true;
   }
 
@@ -187,6 +198,7 @@ export class PipelineManagementComponent implements OnInit {
 
   closeDialog(): void {
     this.showDialog = false;
+    this.editingPipeline = null;
     this.currentPipeline = { camera: null, ml_model: null };
   }
 
@@ -201,12 +213,19 @@ export class PipelineManagementComponent implements OnInit {
     }
 
     this.loading = true;
-    this.configService.post('api/pipelines/', this.currentPipeline).subscribe({
+    const isEditing = !!this.editingPipeline;
+    const request$ = isEditing
+      ? this.configService.patch(`api/pipelines/${this.editingPipeline!.id}/`, this.currentPipeline)
+      : this.configService.post('api/pipelines/', this.currentPipeline);
+
+    request$.subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Created',
-          detail: 'Pipeline created successfully',
+          summary: isEditing ? 'Updated' : 'Created',
+          detail: isEditing
+            ? 'Pipeline updated successfully'
+            : 'Pipeline created successfully',
         });
         this.closeDialog();
         this.loadPipelines();
@@ -215,7 +234,10 @@ export class PipelineManagementComponent implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: error.error?.detail || 'Failed to create pipeline',
+          detail: this.getPipelineErrorMessage(
+            error,
+            isEditing ? 'Failed to update pipeline' : 'Failed to create pipeline'
+          ),
         });
         this.loading = false;
       },
@@ -355,6 +377,36 @@ export class PipelineManagementComponent implements OnInit {
 
   get paginatedPipelines(): Pipeline[] {
     return this.pipelines;
+  }
+
+  private getPipelineErrorMessage(error: any, fallback: string): string {
+    const response = error?.error;
+
+    if (typeof response === 'string' && response.trim()) {
+      return response;
+    }
+
+    if (typeof response?.detail === 'string' && response.detail.trim()) {
+      return response.detail;
+    }
+
+    if (Array.isArray(response?.non_field_errors) && response.non_field_errors.length) {
+      return response.non_field_errors.join(', ');
+    }
+
+    if (response && typeof response === 'object') {
+      for (const value of Object.values(response)) {
+        if (Array.isArray(value) && value.length) {
+          return value.join(', ');
+        }
+
+        if (typeof value === 'string' && value.trim()) {
+          return value;
+        }
+      }
+    }
+
+    return fallback;
   }
 
   private updateMetrics(): void {
